@@ -17,6 +17,25 @@ As members of...
 
 ## The Initial Data Loading and Cleaning
 
+```{r}
+crime_raw <- read.csv("../data/crime_v2.csv")
+```
+
+Last 6 rows are NA in all columns except `prbconv`. `prbconv` has a backtick string character in row 97
+```{r}
+tail(crime_raw, 10)
+```
+
+Remove last 6 rows
+```{r}
+crime <- crime_raw[1:(nrow(crime_raw)-6),]
+```
+
+The presense of the backtick caused `prbconv` to be read in as a factor column. Next we convert it to a numeric column
+```{r}
+crime$prbconv <- as.numeric(levels(crime$prbconv)[crime$prbconv])
+```
+
 ## The Model Building Process
 
 ## Regression Models
