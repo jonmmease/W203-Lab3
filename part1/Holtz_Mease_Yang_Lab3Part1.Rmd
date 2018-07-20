@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Introduction and Research Question
 As members of...
 
-## The Initial Data Loading and Cleaning
+## Initial Data Loading and Cleaning
 First we will load and examine the data set.
 ```{r}
 crime_raw <- read.csv("../data/crime_v2.csv")
@@ -52,7 +52,86 @@ This extreme value (2177.0681) is 860% of the median (253.2) and 556% of the sec
 crime$wser[84] = NA
 ```
 
+## The Model Building Process (Jon)
+
+We will use the reported crime rate, `crmrte`, as our outcome variable.
+
+### Outcome variabel: `crmrte`
+
+```{r}
+summary(crime$crmrte)
+```
+
+The mean is a bit larger than the median indicating a moderate positive skew.
+
+```{r}
+hist(crime$crmrte)
+```
+
+The histogram of `crmrte` confirms the skew and also shows that the distribution of `crmrte` is uniodal.
+
+### Explanatory variable: `density`
+Next we examine potential explanatory variables.  We start `density`, the number of persons per square mile.
+
+```{r}
+summary(crime$density)
+```
+
+Here the median is almost 1.5 times larger than the median, indicating a significant positive skew.
+
+```{r}
+hist(crime$density, breaks = 15)
+```
+
+The histogram of `density` confirms the large positive skew and shows that it has a unimodal distribution peaked at around 0.5-1.0 persons per square mile.
+
+
+```{r}
+plot(crime$density, crime$crmrte)
+```
+
+Based on the scatter plot, there appears to be a positive relationship between population density and crime rate.
+
+### Explanatory variable: `prbarr`
+Next we look at the probability of arrest (`prbarr`).
+
+```{r}
+summary(crime$prbarr)
+```
+The median is slightly larger than the mean, indicating a slight positive skew to the distribution.
+
+```{r}
+hist(crime$prbarr, breaks = 15)
+```
+The histogram shows that the distribution is unimodal, and that the slight positive skew is largely due to two outlying values.
+
+```{r}
+plot(crime$prbarr, crime$crmrte)
+```
+
+The relationship between the log of the probability of arrest and crime rate appears to be a bit more linear, so we will keep this transformation.
+```{r}
+plot(log(crime$prbarr), crime$crmrte)
+```
+
+TODO: Add discussion of rational for choosing these outcome and explanatory variables based on the research question. 
+
 ## The Model Building Process
+
+## Regression Models (Jon)
+
+```{r}
+model1 <- lm(crime$crmrte ~ log(crime$prbarr) + crime$density)
+model1
+```
+
+```{r}
+summary(model1)
+```
+
+TODO: interpret
+TODO: State/Evaluate CLM assumptions.
+
 
 ## Regression Models
 
