@@ -16,24 +16,40 @@ knitr::opts_chunk$set(echo = TRUE)
 As members of...
 
 ## The Initial Data Loading and Cleaning
-
+First we will load and examine the data set.
 ```{r}
 crime_raw <- read.csv("../data/crime_v2.csv")
 ```
 
-Last 6 rows are NA in all columns except `prbconv`. `prbconv` has a backtick string character in row 97
+We note that the last 6 rows of the dataset are `NA` in all columns except `prbconv`. According to the codebook `prbconv` is a numeric variable representing the probability of conviction, but it has been loaded as a factor due to the presence of a backtick string character present in row 97.
+
 ```{r}
-tail(crime_raw, 10)
+tail(crime_raw[,1:6], 10)
 ```
 
-Remove last 6 rows
+We remove last 6 rows from `crime_raw` and create a new data frame `crime` and convert `prbconv` from a factor into a numeric column.
 ```{r}
 crime <- crime_raw[1:(nrow(crime_raw)-6),]
+crime$prbconv <- as.numeric(levels(crime$prbconv)[crime$prbconv])
 ```
 
-The presense of the backtick caused `prbconv` to be read in as a factor column. Next we convert it to a numeric column
+Next we examine the probability variables `prbarr`, `prbconv`, `prbpris`
+
 ```{r}
-crime$prbconv <- as.numeric(levels(crime$prbconv)[crime$prbconv])
+summary(crime[,c('prbarr', 'prbconv', 'prbpris')])
+```
+Here we see that all probability values are non-negative, but `prbarr` and `prbconv` each have values that are greater than one and therefore not valid probabilities. However, the codebook states that "the probability of arrest is proxied by the ratio of arrests to offenses" and "the probability of conviction is proxied by the ratio of convictions to arrests". By these caclulations, it is plausible that these probability proxy variables will have values larger than one, so we do not remove these observations at this time.
+
+Next, we identified an unreasonably anonymous value for the service industry wage, `wser`, in row 84 for county 185.
+
+```{r}
+plot(crime$wser, main = 'Service industry weekly wage')
+```
+
+This extreme value (2177.0681) is 860% of the median (253.2) and 556% of the second largest wage in the dataset (391.3081).  Since the other remaining properties for this observation are all in reasonable ranges, with respect to the other observations in the sample, we will replace the anomolous value with `NA` rather than remove the entire observation.
+
+```{r}
+crime$wser[84] = NA
 ```
 
 ## The Model Building Process
