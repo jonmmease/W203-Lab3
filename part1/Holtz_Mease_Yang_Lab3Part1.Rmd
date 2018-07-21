@@ -18,6 +18,7 @@ As members of...
 ## Initial Data Loading and Cleaning
 First we will load and examine the data set.
 ```{r}
+library(car)
 crime_raw <- read.csv("../data/crime_v2.csv")
 ```
 
@@ -51,6 +52,20 @@ This extreme value (2177.0681) is 860% of the median (253.2) and 556% of the sec
 ```{r}
 crime$wser[84] = NA
 ```
+
+
+There is also an unreasonably low density value which we can identify by ploting density on a log scale.
+
+```{r}
+plot(log(crime$density), main = 'Population density (people per square mile)')
+```
+
+This value value of 0.0000203422. The entire state of North Caroline is 53,819 $mi^2$, and if the entire state had this population density there would be only 1.09 persons in the entire state!  Therefore a country that is a small fraction the size of the entire state that had this density would have less than one person living in it.
+
+```{r}
+crime$density[79] = NA
+```
+
 
 ## The Model Building Process (Jon)
 
@@ -88,9 +103,15 @@ The histogram of `density` confirms the large positive skew and shows that it ha
 
 ```{r}
 plot(crime$density, crime$crmrte)
+abline(lm(crime$crmrte ~ crime$density))
 ```
 
-Based on the scatter plot, there appears to be a positive relationship between population density and crime rate.
+Based on the scatter plot, there appears to be a positive relationship between population density and crime rate.  The relationship is clearer and more symetric about the best-fit line in log-log space.
+
+```{r}
+plot(log(crime$density), log(crime$crmrte))
+abline(lm(log(crime$crmrte) ~ log(crime$density)))
+```
 
 ### Explanatory variable: `prbarr`
 Next we look at the probability of arrest (`prbarr`).
@@ -103,46 +124,88 @@ The median is slightly larger than the mean, indicating a slight positive skew t
 ```{r}
 hist(crime$prbarr, breaks = 15)
 ```
-The histogram shows that the distribution is unimodal, and that the slight positive skew is largely due to two outlying values.
+The histogram shows that the distribution is unimodal, and that the slight positive skew is largely due to two outlying values. Taking the log transform removes the skew altogether
+
+```{r}
+hist(log(crime$prbarr), breaks = 15)
+```
 
 ```{r}
 plot(crime$prbarr, crime$crmrte)
+abline(lm(crime$crmrte ~ crime$prbarr))
 ```
 
 The relationship between the log of the probability of arrest and crime rate appears to be a bit more linear, so we will keep this transformation.
 ```{r}
-plot(log(crime$prbarr), crime$crmrte)
+plot(log(crime$prbarr), log(crime$crmrte))
+abline(lm(log(crime$crmrte) ~ log(crime$prbarr)))
+```
+
+
+```{r}
+plot(crime$pctymle, log(crime$crmrte))
+abline(lm(log(crime$crmrte) ~ crime$pctymle))
+```
+
+```{r}
+plot(crime$pctmin80, log(crime$crmrte))
+abline(lm(log(crime$crmrte) ~ crime$pctmin80))
 ```
 
 TODO: Add discussion of rational for choosing these outcome and explanatory variables based on the research question. 
+
+```{r}
+plot(log(crime$pctymle), log(crime$crmrte))
+abline(lm(log(crime$crmrte) ~ log(crime$pctymle)))
+```
 
 ## The Model Building Process
 
 ## Regression Models (Jon)
 
+
+Model with only the explanatory variables of key interest
+
 ```{r}
-model1 <- lm(crime$crmrte ~ log(crime$prbarr) + crime$density)
-model1
+model1 <- lm(log(crime$crmrte) ~  log(crime$density) + log(crime$pctmin80))
+summary(model1)
+```
+
+Model that includes key explanatory variables and only covariates that you believe increase the accuracy of your results without introducing substantial bias.
+
+```{r}
+model2 <- lm(log(crime$crmrte) ~  log(crime$density) + log(crime$pctmin80) + log(crime$prbconv) + log(crime$prbarr) + log(crime$polpc))
+summary(model2)
+```
+
+One model that includes the previous covariates, and most, if not all, other covariates
+
+```{r}
+model3 <- lm(log(crime$crmrte) ~  log(crime$density) + log(crime$pctmin80) + log(crime$prbconv) + log(crime$prbarr) + log(crime$polpc) + crime$central + log(crime$prbpris) + log(crime$avgsen)
+             + log(crime$wcon) + log(crime$wser) + log(crime$wmfg) + log(crime$wloc) + log(crime$taxpc) + crime$urban )
+summary(model3)
 ```
 
 ```{r}
-summary(model1)
+library(stargazer)
+stargazer(model1, model2, model3, type='text')
 ```
+
+### Observations
+ - The predictive power of pctmin80 is very stable as additional factors are added to the model. Appears to be orthogonal to other features
+ - Predictive power of density is decreased some when prob arrest/conviction are added to the model (There is some colinearity between density and these values)
+ - prob arrest and conviction are not very correlated with each other and each independently is associated with a decrease in crime
+ - 
 
 TODO: interpret
 TODO: State/Evaluate CLM assumptions.
 
-
-## Regression Models
-
-### Regression Model 1
-
-### Regression Model 2
-
-### Regression Model 3
-
-### Regression Table
-
 ## Omitted Variables Discussion
+Need some discussion about `pctmin80` result. We don't have information on the demographics of those being convicted of crimes, 
+
+And `polpc` influence is counterintuitive. Why is there a positive relationship between police per capita and crime?
 
 ## Conclusion
+Political platform of pushing for more/faster arrest/convictions with no or shorter prison sentences. Deterrent seems to be in arrest/conviction, not as much in being sent to prison, or based on how long a prison sentence is.
+
+Further studies needed to understand
