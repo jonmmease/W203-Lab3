@@ -1,0 +1,93 @@
+---
+title: "Lab 3"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+```{r}
+crime <- read.csv("crime_v2.csv")
+summary(crime)
+library(car)
+
+```
+
+
+##Remove NAs, and row 79 which is a outlier has extream low density
+```{r}
+nrow(crime)
+DF_crime <- data.frame(na.omit(crime))
+nrow(DF_crime)
+DF_crime$prbconv=as.numeric(DF_crime$prbconv)
+str(DF_crime)
+DF_crime=DF_crime[-79,]
+
+
+```
+
+##1. What do you want to measure? Make sure you identify variables that will be relevant to the concerns of the political campaign.
+## Measuring the crime rate (crmrte) based on other covariates.  Based on correlation with crime rate, we will do EDA on prbarr, prbconv, density, taxpc, west, urban, wcon, wtrd, wfir, wmfg, wfed, wloc, pctymle
+
+
+```{r}
+dfnew1 <- na.omit(DF_crime[,c(3:25)])
+nrow(dfnew1)
+
+cor(dfnew1)
+```
+
+
+## 2. What covariates help you identify a causal effect? What covariates are problematic, either due to multicollinearity, or because they will absorb some of a causal effect you want to measure?
+### Causal effect: variables that are most causal related are:
+### prbarr(because lower chance of arrest can lead to more crime)
+### prbconv(for similar reason as prbarr)
+
+### problematic:
+### Density and urban are problematic, due to multicollinearity, correlation = .82
+### Wages - one type goes up the other type tends to go up, they can tend to split the effect among themselves.  There is considerable amount of multicollinearity among the different wages.
+### Also density and wages have some multicollinearity, which make sense since jobs in the city tend to have higher wages.
+
+
+### 3. What transformations should you apply to each variable? This is very important because transformations can reveal linearities in the data, make our results relevant, or help us meet model assumptions.
+### Log transformation of prbarr and crmrte helps us to meet the homoskedasticity assumption.
+### Log transformation of density helps us to meet the linearity assumption. We also removed a row of data because of an erroneous density entry.
+
+### 4. Are your choices supported by EDA? You will likely start with some general EDA to detect anomalies (missing values, top-coded variables, etc.). From then on, your EDA should be interspersed with your model building. Use visual tools to guide your decisions.
+
+### Crimrt vs. Density graph without log transformation, and with log transformation
+### The correlation matrix table
+### Crimrt vs. prbarr graph without log transformation, and with log transformation
+```{r}
+scatterplotMatrix(~crmrte+prbarr, data = DF_crime)
+scatterplotMatrix(~log(crmrte)+log(prbarr), data = DF_crime)
+
+scatterplotMatrix(~crmrte+density, data = DF_crime)
+scatterplotMatrix(~log(crmrte)+log(density), data = DF_crime)
+
+#crmrte+prbarr+prbconv+density+taxpc+density+taxpc+west+urban+wcon+wtrd+wfir+wmfg+wfed+wloc+pctymle
+
+
+```
+
+
+```{r}
+(Model1 = lm(log(crmrte) ~ log(prbarr), data = DF_crime))
+summary(Model1)$r.square
+
+(Model2 = lm(log(crmrte) ~ log(prbarr) + log(density), data = DF_crime))
+summary(Model2)$r.square
+
+(Model3 = lm(log(crmrte) ~ log(prbarr) + urban + log(density), data = DF_crime))
+summary(Model3)$r.square
+
+
+```
