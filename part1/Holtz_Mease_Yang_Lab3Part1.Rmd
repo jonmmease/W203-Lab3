@@ -19,6 +19,7 @@ As members of...
 First we will load and examine the data set.
 ```{r}
 library(car)
+library(stargazer)
 crime_raw <- read.csv("../data/crime_v2.csv")
 ```
 
@@ -41,7 +42,7 @@ summary(crime[,c('prbarr', 'prbconv', 'prbpris')])
 ```
 Here we see that all probability values are non-negative, but `prbarr` and `prbconv` each have values that are greater than one and therefore not valid probabilities. However, the codebook states that "the probability of arrest is proxied by the ratio of arrests to offenses" and "the probability of conviction is proxied by the ratio of convictions to arrests". By these caclulations, it is plausible that these probability proxy variables will have values larger than one, so we do not remove these observations at this time.
 
-Next, we identified an unreasonably anonymous value for the service industry wage, `wser`, in row 84 for county 185.
+Next, we identified an unreasonably anomalous value for the service industry wage, `wser`, in row 84 for county 185.
 
 ```{r}
 plot(crime$wser, main = 'Service industry weekly wage')
@@ -67,7 +68,7 @@ crime$density[79] = NA
 ```
 
 
-## The Model Building Process (Jon)
+## The Model Building Process
 
 We will use the reported crime rate, `crmrte`, as our outcome variable.
 
@@ -161,41 +162,86 @@ abline(lm(log(crime$crmrte) ~ log(crime$pctymle)))
 
 ## The Model Building Process
 
-## Regression Models (Jon)
+## Regression Models
 
+### Model 1
+Model with only the explanatory variables of key interest.
 
-Model with only the explanatory variables of key interest
-
-```{r}
-model1 <- lm(log(crime$crmrte) ~  log(crime$density) + log(crime$pctmin80))
-summary(model1)
-```
-
-Model that includes key explanatory variables and only covariates that you believe increase the accuracy of your results without introducing substantial bias.
+prbarr(because lower chance of arrest can lead to more crime)
+prbconv and prbpris (for similar reason as prbarr)
+polpc has strong positive correlation with prbarr, pctmin80 is included for the reason of political campaign.
 
 ```{r}
-model2 <- lm(log(crime$crmrte) ~  log(crime$density) + log(crime$pctmin80) + log(crime$prbconv) + log(crime$prbarr) + log(crime$polpc))
-summary(model2)
-```
-
-One model that includes the previous covariates, and most, if not all, other covariates
-
-```{r}
-model3 <- lm(log(crime$crmrte) ~  log(crime$density) + log(crime$pctmin80) + log(crime$prbconv) + log(crime$prbarr) + log(crime$polpc) + crime$central + log(crime$prbpris) + log(crime$avgsen)
-             + log(crime$wcon) + log(crime$wser) + log(crime$wmfg) + log(crime$wloc) + log(crime$taxpc) + crime$urban )
-summary(model3)
+scatterplotMatrix(~log(crmrte)+log(prbarr), data = crime)
 ```
 
 ```{r}
-library(stargazer)
-stargazer(model1, model2, model3, type='text')
+scatterplotMatrix(~log(crmrte)+log(polpc), data = crime)
+```
+
+```{r}
+(Model1 <- lm(log(crmrte) ~ log(prbarr) + prbconv + prbpris + log(polpc) + pctmin80, data=crime))
+summary(Model1)
+```
+
+```{r}
+plot(Model1$fitted.values, Model1$residuals)
+```
+
+### Model 2
+adding density, wfed and wser to the key explanatory variables.
+Density and urban are problematic, due to multicollinearity, correlation = .82
+Wages - one type goes up the other type tends to go up, they can tend to split the effect among themselves. There is considerable amount of multicollinearity among the different wages.
+Also density and wages have some multicollinearity, which make sense since jobs in the city tend to have higher wages.
+Residuals apprear to be centered at 0, also we don’t see any patterns in the residuals
+
+```{r}
+(Model2 = lm(log(crmrte) ~ log(prbarr) + prbconv + prbpris + log(polpc) + pctmin80 + log(density) + + wfed + wser, data = crime))
+summary(Model2)$r.square
+```
+
+```{r}
+plot(Model2$fitted.values, Model2$residuals)
+```
+
+```{r}
+(Model2.1 = lm(log(crmrte) ~ log(prbarr) + prbconv + prbpris + log(polpc) + pctmin80 + urban, data = crime))
+summary(Model2.1)$r.square
+```
+
+
+### Model 3
+Everything except west, urban and central
+
+```{r}
+(Model3 = lm(log(crmrte) ~ log(prbarr) + prbconv + prbpris + log(polpc) + pctmin80 + log(density) + wser + county + avgsen + taxpc + wcon + wtuc + wtrd + wfir + wmfg + wfed + wsta + wloc + mix + pctymle, data = crime))
+summary(Model3)$r.square
+```
+
+```{r}
+plot(Model3$fitted.values, Model3$residuals)
+```
+
+### Models Table
+
+```{r}
+stargazer(Model1, Model2, Model2.1, Model3, type = "text", 
+          report = "vc", # Don't report errors, since we haven't covered them
+          title = "Linear Models Predicting Crime Rate",
+          keep.stat = c("rsq", "n"),
+          omit.table.layout = "n",
+          header=FALSE) # Omit more output related to errors
+```
+
 ```
 
 ### Observations
  - The predictive power of pctmin80 is very stable as additional factors are added to the model. Appears to be orthogonal to other features
  - Predictive power of density is decreased some when prob arrest/conviction are added to the model (There is some colinearity between density and these values)
  - prob arrest and conviction are not very correlated with each other and each independently is associated with a decrease in crime
- - 
+ - polpc correlates positively with ave sentence.
+
+Maybe policy to shift people toward lower density:
 
 TODO: interpret
 TODO: State/Evaluate CLM assumptions.
