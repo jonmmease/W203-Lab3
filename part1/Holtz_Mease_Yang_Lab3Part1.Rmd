@@ -13,14 +13,35 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Introduction and Research Question
-As members of...
+As members of Berkeley Analytica, a political consultancy,
+we seek to inform political operatives on what policy decisions
+could be most useful once they take office. We also seek to 
+help inform their campaigns so they can offer voters a sincere, 
+intellectually honest, and meaningful vision for how a candidate 
+or party could change society. 
+
+In this project, we are applying a cross section of data from 
+C. Cornwell and W. Trumball (1994), "Estimating the Economic Model
+of Crime with Panel Data," Review of Economics and Statistics. 
+The primary objective of this project is to inform policy makers of the 
+value of laws and funding decisions viewed through the lens of reducing
+crime. Specific policy questions include, providing funding for more 
+police officers; setting guidance or requirements for sentencing of criminals;
+implementing policies that improve the distribution of minorities across 
+neighborhoods; and implimenting policies that keep young males occupued and
+out of trouble. 
+The secondary objective of this project will be to identify other factors
+that affect crime that policy makers could account for in formulating a 
+strategy to reduce crime. 
 
 ## Initial Data Loading and Cleaning
 First we will load and examine the data set.
 ```{r}
 library(car)
 library(stargazer)
-crime_raw <- read.csv("../data/crime_v2.csv")
+setwd("C:/Users/Holtz/Documents/Berkeley/203 Stats & R/Lab 3")
+getwd()
+crime_raw <- read.csv("crime_v2.csv")
 ```
 
 We note that the last 6 rows of the dataset are `NA` in all columns except `prbconv`. According to the codebook `prbconv` is a numeric variable representing the probability of conviction, but it has been loaded as a factor due to the presence of a backtick string character present in row 97.
@@ -66,8 +87,6 @@ This value value of 0.0000203422. The entire state of North Caroline is 53,819 $
 ```{r}
 crime$density[79] = NA
 ```
-
-
 ## The Model Building Process
 
 We will use the reported crime rate, `crmrte`, as our outcome variable.
@@ -153,7 +172,23 @@ plot(crime$pctmin80, log(crime$crmrte))
 abline(lm(log(crime$crmrte) ~ crime$pctmin80))
 ```
 
-TODO: Add discussion of rational for choosing these outcome and explanatory variables based on the research question. 
+
+# Because we are working for a political campaign we want to investigate parameters that will inform
+# policy decisions once the political party is in power, as well as the platform that the campaign
+# will use to get elected.
+# Based on that premise, and because density is the single most predictive paramter in the dataset,
+# we want to investigate the effects of population density on crime. 
+# Similarly, we believe that probability of arrest is worth investigating as it will inform
+# policy decisions and the platform on whether or not more funding should be put into having more police 
+# officers. 
+# Furthermore, the population of young males and the percentage of minorities in a population need to 
+# be addressed as those appear to receive political focus already, and the campaign should be aware of 
+# the actual relationships between those variables and crime rates. For policy makers, the correlation
+# between minorities and crime could be useful evidence to support policies that would lead to 
+# greater integration of cultural groups into
+# every neighborhood. 
+# Similarly, a relationship between young males and crime could be used to justify funding for programs
+# that help young males stay occupied and away from criminal elements.
 
 ```{r}
 plot(log(crime$pctymle), log(crime$crmrte))
@@ -188,6 +223,18 @@ summary(Model1)
 plot(Model1$fitted.values, Model1$residuals)
 ```
 
+# Model 1 includes the explanatory variables of key interest to the political 
+# campaign: 
+# 1. Probability of Arrest, transformed by taking the log
+# 2. Probability of Conviction
+# 3. Probability of Prison
+# 4. Police Per Capita, transformed by taking the log
+# These variables were selected as they are factors that a political operative
+# can influence, once they are in power. The average sentence length was 
+# omitted purposely because it did not have a meaningful correlation with crime
+# rates. This observation is valuable for policy-makers as it could permit
+# better decision making with respect to allocation of funds.
+
 ### Model 2
 adding density, wfed and wser to the key explanatory variables.
 Density and urban are problematic, due to multicollinearity, correlation = .82
@@ -196,22 +243,53 @@ Also density and wages have some multicollinearity, which make sense since jobs 
 Residuals apprear to be centered at 0, also we don’t see any patterns in the residuals
 
 ```{r}
-(Model2 = lm(log(crmrte) ~ log(prbarr) + prbconv + prbpris + log(polpc) + pctmin80 + log(density) + + wfed + wser, data = crime))
+(Model2 = lm(log(crmrte) ~ log(prbarr) + prbconv + prbpris + log(polpc) + pctmin80 + log(density) + wfed + wser, data = crime))
 summary(Model2)$r.square
+summary(Model2)
 ```
 
 ```{r}
 plot(Model2$fitted.values, Model2$residuals)
 ```
 
+# Model 2 includes the following terms:
+# 1. Log of probability of arrest
+# 2. Probability of conviction
+# 3. Log of Police Per Capita
+# 4. Percent Minority
+# 5. Log of density
+# 6. Average wage of federal employees
+# 7. Average wage of service industry employees
+
+# The log of density term was added to Model 2 to improve accuracy
+# because the exploratory data analysis revealed that there is a
+# positive correlation between density and crime rate. This correlation
+# has been noted by other researchers (Geoffrey West in "Scale: The Universal 
+# Laws of Growth, Innovation, Sustainability, and the Pace of Life in 
+# Organisms, Cities, Economies, and Companies"). This is a useful variable as 
+# policy makers could encourage development and housing policies that lead 
+# to lower population density such as improving transit options to suburban 
+# areas. 
+
+# The average wage of federal employees was included as it was expected to
+# add a degree of further accuracy to the model, but as most of the wage terms
+# were colinear with density, most of the other wage terms were omitted purposely.
+
+# The average wage of the service industry was included because among the
+# wage variables it was unique for being negatively correlated with crime
+# rates. Policy makers could view this as evidence for the value of increasing
+# the minimum wage in the hopes of reducing crime.
+
 ```{r}
 (Model2.1 = lm(log(crmrte) ~ log(prbarr) + prbconv + prbpris + log(polpc) + pctmin80 + urban, data = crime))
 summary(Model2.1)$r.square
 ```
-
+# Model2.1 was created to confirm if 'urban' was a better 
+# variable to use than 'density' as the two are colinear.
+# Model2.1 is less accurate than Model2, so we will continue with 
+# Model2.
 
 ### Model 3
-Everything except west, urban and central
 
 ```{r}
 (Model3 = lm(log(crmrte) ~ log(prbarr) + prbconv + prbpris + log(polpc) + pctmin80 + log(density) + wser + county + avgsen + taxpc + wcon + wtuc + wtrd + wfir + wmfg + wfed + wsta + wloc + mix + pctymle, data = crime))
@@ -221,6 +299,15 @@ summary(Model3)$r.square
 ```{r}
 plot(Model3$fitted.values, Model3$residuals)
 ```
+
+# Model 3 was constructed using every variable with the exception of the "west", "central", and "urban"
+# variables. The analysts believed that these variables are already correlated with density and 
+# they do not have any intrinsic value in informing policy. 
+# By including all the remaining variables, the r-squared value of Model 3 improved by 
+# 4.39 percentage points over Model 2. This compares with a 12 percentage point improvement between
+# Model 2 and Model 1. 
+# The analysts at Berkeley Analytica conclude that the improved fit of Model 3 is not justified 
+# by the additional data. In short, Model 2 is more valueable as Model 3 may be approaching over-fitting.
 
 ### Models Table
 

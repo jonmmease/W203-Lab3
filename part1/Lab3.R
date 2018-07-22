@@ -9,7 +9,7 @@
 
 setwd("C:/Users/Holtz/Documents/Berkeley/203 Stats & R/Lab 3")
 getwd()
-
+library(car)
 #####################################################################
 
 mydata = read.csv("crime_v2.csv")
@@ -30,13 +30,19 @@ hist(mydata$wcon, 10) # close to normal
 hist(mydata$wtuc, 10) # close to normal
 hist(mydata$wtrd, 10) # close to normal, some bias to the right?
 hist(mydata$wfir) # close to normal
-hist(mydata$wser, 100) # normally distributed <500, except one outlier... need to think on that data point.
+hist(mydata$wser, 10) # normally distributed <500, except one outlier... need to think on that data point.
+mean(mydata$wser)
+mean(mydata$wmfg)
 hist(mydata$wmfg, 10) # close to normal
 hist(mydata$wfed, 10) # close to normal, some bias to left
 hist(mydata$wsta, 10) # close to normal
 hist(mydata$wloc) # close to normal
 hist(mydata$mix) #bias to the left - need to think about transformation
 hist(mydata$pctymle) #bias to the left - need to think about transformation
+
+
+scatterplotMatrix(~mydata$crmrte+mydata$pctymle)
+scatterplotMatrix(~log(mydata$crmrte)+log10(mydata$pctymle)+log(mydata$density))
 
 
 #####################################################################
@@ -61,6 +67,8 @@ plot(mydata$polpc, mydata$crmrte)
 abline(crime_rate_model_4)
 summary(crime_rate_model_4) # R-squared = 0.02886
 
+mydata$density[79]
+mydata$density[79] <- 
 crime_rate_model_5 = lm(mydata$crmrte ~ mydata$density)
 plot(mydata$density, mydata$crmrte)
 abline(crime_rate_model_5)
