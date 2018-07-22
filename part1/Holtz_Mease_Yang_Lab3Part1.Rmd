@@ -114,7 +114,7 @@ Based on this, we define our outcome variable as the natrual log of `crmrte`. Th
 ### Explanatory variables
 Because we are working for a political campaign we want to investigate parameters that will inform policy decisions once the political party is in power, as well as the platform that the campaign will use to get elected. 
 
-#### `density`
+#### Population density: `density`
 We start `density`, the number of persons per square mile. Here the median is almost 1.5 times larger than the median, indicating a significant positive skew.
 
 ```{r}
@@ -148,69 +148,66 @@ legend('bottomright', legend=r2_text(model.density))
 
 Based on the slope and R² statistic of the best-fit line we see that a 1% increase in population density is associated with a ~0.49% increase in the crime rate, and that population density by itself can predict 47% of the variation in crime rate across North Carolina.
 
-### Explanatory variable: `prbarr`
-Next we look at the probability of arrest (`prbarr`).
+#### Probability of arrest, conviction, and prison sentence: `prbarr`, `prbconv`, and `prbpris`
 
-```{r}
-summary(crime$prbarr)
-```
-The median is slightly larger than the mean, indicating a slight positive skew to the distribution.
+We believe that probability of arrest is worth investigating as it will inform policy decisions and the platform on whether or not more resources should be put towards increasing the likelihood that a person who commits a crime will be arrested.
 
+The histogram of the `prbarr` variable shows that the distribution is unimodal with a slight positive skew.
 ```{r}
-hist(crime$prbarr, breaks = 15)
-```
-The histogram shows that the distribution is unimodal, and that the slight positive skew is largely due to two outlying values. Taking the log transform removes the skew altogether
-
-```{r}
-hist(log(crime$prbarr), breaks = 15)
+hist(crime$prbarr, breaks = 10)
 ```
 
+Taking the log transform removes the skew altogether, and so we will use the natural log of `prbarr` as an explanotory variable.
 ```{r}
-plot(crime$prbarr, crime$crmrte)
-abline(lm(crime$crmrte ~ crime$prbarr))
+hist(log(crime$prbarr), breaks = 10)
 ```
 
-The relationship between the log of the probability of arrest and crime rate appears to be a bit more linear, so we will keep this transformation.
-```{r}
-plot(log(crime$prbarr), log(crime$crmrte))
-abline(lm(log(crime$crmrte) ~ log(crime$prbarr)))
-```
-
+In a scatter plot with our outcome variable we note a negative relationship between percentage change in probability of arrest and percentage change in crime rate.
 
 ```{r}
-plot(crime$pctymle, log(crime$crmrte))
-abline(lm(log(crime$crmrte) ~ crime$pctymle))
+model.prbarr <- lm(log(crime$crmrte) ~ log(crime$prbarr))
+plot(log(crime$prbarr), log(crime$crmrte), main = 'Probability of arrest and crime rate')
+abline(model.prbarr)
+legend('bottomright', legend=r2_text(model.prbarr))
+```
+Based on the slope and R² statistic of the best-fit line we see that a 1% increase in probability of arrest is associated with a ~0.59% decrease in the crime rate, and that probability of arrest by itself can predict 19% of the variation in crime rate across the state.
+
+Based on similar observations, we also apply a natural log transformation to the probabiliy of conviction (`prbconv`) and probability of prison sentence (`prbpris`) variables.
+
+#### Police officers per capita: `polpc`
+
+A natural instinct of policy makers working to reduce crime may be to increase the number of police officers, and so it is important for them understand the existing associate between police officers per capita (`polpc`) and the crime rate.  Here again we apply a log transform, as it improves the linearity of the relationship with our outcome variable.
+
+```{r}
+model.polpc <- lm(log(crime$crmrte) ~ log(crime$polpc))
+plot(log(crime$polpc), log(crime$crmrte), main = 'Police officers per capita and crime rate')
+abline(model.polpc)
+legend('bottomright', legend=r2_text(model.polpc))
+```
+
+Based on the slope and R² statistic of the best-fit line we see that a 1% increase in police per capita is associated with a ~0.42% increase in the crime rate, and that this association predicts 8% of the variation in crime rate.
+
+#### Percent young male and percent minority: `pctymle` and `pctmin80`
+
+Furthermore, the percentages of young males and minorities in a population need to be examined as those tend to receive ongoing political focus, and the campaign should be aware of the actual relationships between those variables and crime rates.  For the same reasons as discussed above, we apply a log transform to both of these variables.
+
+```{r}
+model.pctmin80 <- lm(log(crime$crmrte) ~ log(crime$pctmin80))
+plot(log(crime$pctmin80), log(crime$crmrte), main = 'Percent minority and crime rate')
+abline(model.pctmin80)
+legend('bottomright', legend=r2_text(model.pctmin80))
 ```
 
 ```{r}
-plot(crime$pctmin80, log(crime$crmrte))
-abline(lm(log(crime$crmrte) ~ crime$pctmin80))
+model.pctymle <- lm(log(crime$crmrte) ~ log(crime$pctymle))
+plot(log(crime$pctymle), log(crime$crmrte), main = 'Percent young male and crime rate')
+abline(model.pctymle)
+legend('bottomright', legend=r2_text(model.pctymle))
 ```
 
+Based on the slope and R² statistic of the best-fit line we see that a 1% increase in percentage minority is associated with a ~0.23% increase in crime rate. Similarly, a 1% increase in percentage young male is associated with a ~0.86% increase in crime rate.
 
-# Because we are working for a political campaign we want to investigate parameters that will inform
-# policy decisions once the political party is in power, as well as the platform that the campaign
-# will use to get elected.
-# Based on that premise, and because density is the single most predictive paramter in the dataset,
-# we want to investigate the effects of population density on crime. 
-# Similarly, we believe that probability of arrest is worth investigating as it will inform
-# policy decisions and the platform on whether or not more funding should be put into having more police 
-# officers. 
-# Furthermore, the population of young males and the percentage of minorities in a population need to 
-# be addressed as those appear to receive political focus already, and the campaign should be aware of 
-# the actual relationships between those variables and crime rates. For policy makers, the correlation
-# between minorities and crime could be useful evidence to support policies that would lead to 
-# greater integration of cultural groups into
-# every neighborhood. 
-# Similarly, a relationship between young males and crime could be used to justify funding for programs
-# that help young males stay occupied and away from criminal elements.
-
-```{r}
-plot(log(crime$pctymle), log(crime$crmrte))
-abline(lm(log(crime$crmrte) ~ log(crime$pctymle)))
-```
-
-## The Model Building Process
+For policy makers, a positive correlation between minorities and crime could be useful evidence to support policies that would lead to greater integration of cultural groups into every neighborhood. Similarly, a positive relationship between young males and crime could be used to justify funding for programs that help young males stay occupied and away from criminal elements.
 
 ## Regression Models
 
@@ -230,7 +227,7 @@ scatterplotMatrix(~log(crmrte)+log(polpc), data = crime)
 ```
 
 ```{r}
-(Model1 <- lm(log(crmrte) ~ log(prbarr) + prbconv + prbpris + log(polpc) + pctmin80, data=crime))
+(Model1 <- lm(log(crmrte) ~ log(prbarr) + log(prbconv) + log(prbpris) + log(avgsen) + log(polpc), data=crime))
 summary(Model1)
 ```
 
@@ -258,7 +255,7 @@ Also density and wages have some multicollinearity, which make sense since jobs 
 Residuals apprear to be centered at 0, also we don’t see any patterns in the residuals
 
 ```{r}
-(Model2 = lm(log(crmrte) ~ log(prbarr) + prbconv + prbpris + log(polpc) + pctmin80 + log(density) + wfed + wser, data = crime))
+(Model2 = lm(log(crmrte) ~ log(prbarr) + log(prbconv) + log(prbpris) + log(polpc) + log(pctmin80) + log(density) + wfed + wser, data = crime))
 summary(Model2)$r.square
 summary(Model2)
 ```
