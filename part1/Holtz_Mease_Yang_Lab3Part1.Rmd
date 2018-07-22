@@ -10,6 +10,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(car)
+library(stargazer)
 ```
 
 ## Introduction and Research Question
@@ -37,11 +39,7 @@ strategy to reduce crime.
 ## Initial Data Loading and Cleaning
 First we will load and examine the data set.
 ```{r}
-library(car)
-library(stargazer)
-setwd("C:/Users/Holtz/Documents/Berkeley/203 Stats & R/Lab 3")
-getwd()
-crime_raw <- read.csv("crime_v2.csv")
+crime_raw <- read.csv("../data/crime_v2.csv")
 ```
 
 We note that the last 6 rows of the dataset are `NA` in all columns except `prbconv`. According to the codebook `prbconv` is a numeric variable representing the probability of conviction, but it has been loaded as a factor due to the presence of a backtick string character present in row 97.
@@ -50,20 +48,20 @@ We note that the last 6 rows of the dataset are `NA` in all columns except `prbc
 tail(crime_raw[,1:6], 10)
 ```
 
-We remove last 6 rows from `crime_raw` and create a new data frame `crime` and convert `prbconv` from a factor into a numeric column.
+We remove last 6 rows from `crime_raw` and create a new data frame, `crime`, and convert `prbconv` from a factor into a numeric column.
 ```{r}
 crime <- crime_raw[1:(nrow(crime_raw)-6),]
 crime$prbconv <- as.numeric(levels(crime$prbconv)[crime$prbconv])
 ```
 
-Next we examine the probability variables `prbarr`, `prbconv`, `prbpris`
+Next we examine the probability variables `prbarr` (The 'probability' of arrest), `prbconv` (The 'probability' of conviction), `prbpris` (The probability of prison sentence.).
 
 ```{r}
 summary(crime[,c('prbarr', 'prbconv', 'prbpris')])
 ```
-Here we see that all probability values are non-negative, but `prbarr` and `prbconv` each have values that are greater than one and therefore not valid probabilities. However, the codebook states that "the probability of arrest is proxied by the ratio of arrests to offenses" and "the probability of conviction is proxied by the ratio of convictions to arrests". By these caclulations, it is plausible that these probability proxy variables will have values larger than one, so we do not remove these observations at this time.
+Here we see that all probability values are non-negative, but `prbarr` and `prbconv` each have values that are greater than one and therefore not valid probabilities. However, the codebook states that "the probability of arrest is proxied by the ratio of arrests to offenses" and "the probability of conviction is proxied by the ratio of convictions to arrests". By these caclulations, it is plausible that these probability proxy variables will have values larger than one, so we do not omin these observations.
 
-Next, we identified an unreasonably anomalous value for the service industry wage, `wser`, in row 84 for county 185.
+Next, we identify an unreasonably anomalous value for the service industry wage, `wser`, in row 84 for county 185.
 
 ```{r}
 plot(crime$wser, main = 'Service industry weekly wage')
@@ -76,13 +74,13 @@ crime$wser[84] = NA
 ```
 
 
-There is also an unreasonably low density value which we can identify by ploting density on a log scale.
+There is a single unreasonably low value of the `density` variable, which we can identify by ploting density on a log scale.
 
 ```{r}
 plot(log(crime$density), main = 'Population density (people per square mile)')
 ```
 
-This value value of 0.0000203422. The entire state of North Caroline is 53,819 $mi^2$, and if the entire state had this population density there would be only 1.09 persons in the entire state!  Therefore a country that is a small fraction the size of the entire state that had this density would have less than one person living in it.
+The 79th observation has a linear scale `density` value of 0.0000203422 people per square mile. The entire state of North Caroline is 53,819 square miles, and if the entire state had this population density there would be only 1.09 persons in the entire state!  Therefore a county that is a small fraction of the size of the state that had this density would have less than one person living in it. As above, the remaining variables for this observation all have reasonable values so we once again replace the errant value by `NA` rather than omit the observation.
 
 ```{r}
 crime$density[79] = NA
