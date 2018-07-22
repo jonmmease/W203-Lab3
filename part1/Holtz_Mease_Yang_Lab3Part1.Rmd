@@ -318,8 +318,6 @@ stargazer(Model1, Model2, Model2.1, Model3, type = "text",
           header=FALSE) # Omit more output related to errors
 ```
 
-```
-
 ### Observations
  - The predictive power of pctmin80 is very stable as additional factors are added to the model. Appears to be orthogonal to other features
  - Predictive power of density is decreased some when prob arrest/conviction are added to the model (There is some colinearity between density and these values)
