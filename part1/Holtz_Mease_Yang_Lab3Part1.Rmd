@@ -1,11 +1,12 @@
 ---
-title: "W203 Lab 3, Part 1: Reducing Crime"
+title: 'W203 Lab 3, Part 1: Reducing Crime'
 author:
 - Stephen Holtz
 - Jon Mease
 - Hong Yang
-
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -59,6 +60,7 @@ Next we examine the probability variables `prbarr` (The 'probability' of arrest)
 ```{r}
 summary(crime[,c('prbarr', 'prbconv', 'prbpris')])
 ```
+
 Here we see that all probability values are non-negative, but `prbarr` and `prbconv` each have values that are greater than one and therefore not valid probabilities. However, the code book states that "the probability of arrest is proxied by the ratio of arrests to offenses" and "the probability of conviction is proxied by the ratio of convictions to arrests". By these calculations, it is plausible that these probability proxy variables will have values larger than one, so we do not omit these observations.
 
 Next, we identify an unreasonably anomalous value for the service industry wage, `wser`, in row 84 for county 185.
@@ -73,7 +75,6 @@ This extreme value (2177.0681) is 860% of the median (253.2) and 556% of the sec
 crime$wser[84] = NA
 ```
 
-
 There is a single unreasonably low value of the `density` variable, which we can identify by plotting density on a log scale.
 
 ```{r}
@@ -85,6 +86,7 @@ The 79th observation has a linear scale `density` value of 0.0000203422 people p
 ```{r}
 crime$density[79] = NA
 ```
+
 ## The Model Building Process
 
 To investigate our research question the outcome variable of this analysis will be based on the `crmrte` variable.
@@ -92,6 +94,7 @@ To investigate our research question the outcome variable of this analysis will 
 ### Outcome variable: `crmrte`
 
 Summarizing `crmrte` we see that the mean is a bit larger than the median indicating a moderate positive skew.
+
 ```{r}
 summary(crime$crmrte)
 ```
@@ -110,7 +113,6 @@ hist(log(crime$crmrte), main = "Histogram of the log of crime rate")
 
 Based on this, we define our outcome variable as the natural log of `crmrte`. This means that the models we build in this report will describe percentage (not absolute) changes to the crime rate.
 
-
 ### Explanatory variables
 Because we are working for a political campaign we want to investigate parameters that will inform policy decisions once the political party is in power, as well as the platform that the campaign will use to get elected. 
 
@@ -124,24 +126,28 @@ summary(crime$density)
 The histogram of `density` confirms the large positive skew and shows that it has a unimodal distribution peaked at around 0.5-1.0 persons per square mile. 
 
 ```{r}
-hist(crime$density, breaks = 15, main = "Histogram of population density")
+hist(crime$density, breaks = 15,
+     main = "Histogram of population density")
 ```
 
  We will use the natural log of `density` as our explanatory variable as it is significantly less skewed than `density` itself.
 
 ```{r}
-hist(log(crime$density), breaks = 15, main = "Histogram of the log of population density")
+hist(log(crime$density), breaks = 15,
+     main = "Histogram of the log of population density")
 ```
 
 In a scatter plot with our outcome variable we note a positive relationship between percentage change in population density and percentage change in crime rate.
 
 ```{r}
 r2_text <- function(model) {
-  return(sprintf('Slope: %.2f\n     R²: %.2f', model$coefficients[[2]], summary(model)$r.squared))
+  return(sprintf('Slope: %.2f\n     R²: %.2f',
+                 model$coefficients[[2]], summary(model)$r.squared))
 }
 
 model.density <- lm(log(crime$crmrte) ~ log(crime$density))
-plot(log(crime$density), log(crime$crmrte), main = 'Population density and crime rate')
+plot(log(crime$density), log(crime$crmrte),
+     main = 'Population density and crime rate')
 abline(model.density)
 legend('bottomright', legend=r2_text(model.density))
 ```
@@ -153,23 +159,29 @@ Based on the slope and R² statistic of the best-fit line we see that a 1% incre
 We believe that probability of arrest is worth investigating as it will inform policy decisions and the platform on whether or not more resources should be put towards increasing the likelihood that a person who commits a crime will be arrested.
 
 The histogram of the `prbarr` variable shows that the distribution is unimodal with a slight positive skew.
+
 ```{r}
-hist(crime$prbarr, breaks = 10, main = "Histogram of probability of arrest")
+hist(crime$prbarr, breaks = 10,
+     main = "Histogram of probability of arrest")
 ```
 
 Taking the log transform removes the skew altogether, and so we will use the natural log of `prbarr` as an explanatory variable.
+
 ```{r}
-hist(log(crime$prbarr), breaks = 10, main = "Histogram of the log of the probability of arrest")
+hist(log(crime$prbarr), breaks = 10,
+     main = "Histogram of the log of the probability of arrest")
 ```
 
 In a scatter plot with our outcome variable we note a negative relationship between percentage change in probability of arrest and percentage change in crime rate.
 
 ```{r}
 model.prbarr <- lm(log(crime$crmrte) ~ log(crime$prbarr))
-plot(log(crime$prbarr), log(crime$crmrte), main = 'Probability of arrest and crime rate')
+plot(log(crime$prbarr), log(crime$crmrte),
+     main = 'Probability of arrest and crime rate')
 abline(model.prbarr)
 legend('bottomright', legend=r2_text(model.prbarr))
 ```
+
 Based on the slope and R² statistic of the best-fit line we see that a 1% increase in probability of arrest is associated with a ~0.59% decrease in the crime rate, and that probability of arrest by itself can predict 19% of the variation in crime rate across the state.
 
 Based on similar observations, we also apply a natural log transformation to the probability of conviction (`prbconv`) and probability of prison sentence (`prbpris`) variables.
@@ -180,7 +192,8 @@ A natural instinct of policy makers working to reduce crime may be to increase t
 
 ```{r}
 model.polpc <- lm(log(crime$crmrte) ~ log(crime$polpc))
-plot(log(crime$polpc), log(crime$crmrte), main = 'Police officers per capita and crime rate')
+plot(log(crime$polpc), log(crime$crmrte),
+     main = 'Police officers per capita and crime rate')
 abline(model.polpc)
 legend('bottomright', legend=r2_text(model.polpc))
 ```
@@ -193,14 +206,16 @@ Furthermore, the percentages of young males and minorities in a population need 
 
 ```{r}
 model.pctmin80 <- lm(log(crime$crmrte) ~ log(crime$pctmin80))
-plot(log(crime$pctmin80), log(crime$crmrte), main = 'Percent minority and crime rate')
+plot(log(crime$pctmin80), log(crime$crmrte),
+     main = 'Percent minority and crime rate')
 abline(model.pctmin80)
 legend('bottomright', legend=r2_text(model.pctmin80))
 ```
 
 ```{r}
 model.pctymle <- lm(log(crime$crmrte) ~ log(crime$pctymle))
-plot(log(crime$pctymle), log(crime$crmrte), main = 'Percent young male and crime rate')
+plot(log(crime$pctymle), log(crime$crmrte),
+     main = 'Percent young male and crime rate')
 abline(model.pctymle)
 legend('bottomright', legend=r2_text(model.pctymle))
 ```
@@ -236,10 +251,12 @@ The model coefficients imply that, all else being equal, an increase in probabil
 The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values.
  
 ```{r}
-plot(Model1$fitted.values, Model1$residuals, main = 'Residuals and fitted values: Model 1')
+plot(Model1$fitted.values, Model1$residuals,
+     main = 'Residuals and fitted values: Model 1')
 ```
 
 This histogram of residuals shows that the residuals are distributed approximately normally with mean 0 (with the exception of a few outlying points with larger negative residuals).
+
 ```{r}
 hist(Model1$residuals, main = 'Histogram of residuals: Model 1')
 ```
@@ -259,18 +276,22 @@ The log of density term was added to Model 2 to improve accuracy because the exp
 The log of the percent minority population was added to improve accuracy because, again, exploratory data analysis revealed that there is a positive correlation between and crime rate and this factor.
 
 ```{r}
-(Model2 = lm(log(crmrte) ~ log(prbarr) + log(prbconv) + log(polpc) + log(pctmin80) + log(density), data = crime))
+(Model2 = lm(log(crmrte) ~ log(prbarr) + log(prbconv) + log(polpc) +
+               log(pctmin80) + log(density), data = crime))
 sprintf('R²: %.3f', summary(Model2)$r.squared)
 ```
+
 The `prbarr`, `prbconv`, and `polpc` variables retain their same direction of associate as in Model 1, although the magnitude of the associations are reduced somewhat. In addition, we see that a 1% increase in the percent minority population is associated with a ~0.25% increase in the crime rate, and that a 1% increase in the population density is associated with a ~0.28% increase in crime rate.
 
 The model's R² value indicates that 79.4% of the variation in crime rate can be explained by these 5 factors.
 
 #### Classical Linear Model Assumptions
+
 The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values.
 
 ```{r}
-plot(Model2$fitted.values, Model2$residuals, main = 'Residuals and fitted values: Model 2')
+plot(Model2$fitted.values, Model2$residuals,
+     main = 'Residuals and fitted values: Model 2')
 ```
 
 This histogram of residuals shows that the residuals are distributed normally with mean 0.
@@ -284,8 +305,11 @@ hist(Model2$residuals, main = 'Histogram of residuals: Model 2')
 Model 3 was constructed using every variable with the exception of the "west", "central", and "urban" variables. We believed that these variables are already correlated with density and they do not have any intrinsic value in informing policy. 
 
 ```{r}
-(Model3 = lm(log(crmrte) ~  log(prbarr) + log(prbconv) + log(polpc) + log(pctmin80) + log(density) +
-             log(prbpris) + log(pctymle) + avgsen + wser + county +  taxpc + wcon + wtuc + wtrd + wfir + wmfg + wfed + wsta + wloc + mix, data = crime))
+(Model3 = lm(log(crmrte) ~  log(prbarr) + log(prbconv) + log(polpc) +
+               log(pctmin80) + log(density) + log(prbpris) +
+               log(pctymle) + avgsen + wser + county +  taxpc + wcon +
+               wtuc + wtrd + wfir + wmfg + wfed + wsta + wloc + mix,
+             data = crime))
 
 sprintf('R²: %.3f', summary(Model3)$r.squared)
 ```
@@ -293,6 +317,7 @@ sprintf('R²: %.3f', summary(Model3)$r.squared)
 By including all the remaining variables, the r-squared value of Model 3 improved by ~5% percentage points over Model 2. This compares with a ~32% percentage point improvement between Model 2 and Model 1. The analysts at Berkeley Analytica conclude that the improved fit of Model 3 is not justified by the additional data. In short, Model 2 is more valuable as Model 3 may be approaching over-fitting.
 
 #### CLM Assumptions
+
 The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values.
 
 ```{r}
@@ -307,8 +332,8 @@ hist(Model3$residuals, main = 'Histogram of residuals: Model 3')
 
 ### Models Table
 
-```{r}
-stargazer(Model1, Model2, Model3, type = "text", 
+```{r, results = "asis"}
+stargazer(Model1, Model2, Model3, type = "latex", 
           report = "vc", # Don't report errors, since we haven't covered them
           title = "Linear Models Predicting Crime Rate",
           keep.stat = c("rsq", "n"),
@@ -317,9 +342,9 @@ stargazer(Model1, Model2, Model3, type = "text",
 ```
 
 ## Omitted Variables Discussion
-The results from the polpc (Police percapita) variable is counterintuitive at first glance. However, on further 
-examination, it becomes clear that both crime rate and police percapita increase with increasing density, however,
-crime rate increases faster with density than police percapita. The net result is that there is a positive 
+The results from the polpc (Police per capita) variable is counter-intuitive at first glance. However, on further 
+examination, it becomes clear that both crime rate and police per capita increase with increasing density, however,
+crime rate increases faster with density than police per capita. The net result is that there is a positive 
 correlation between police and crime. This does not, however, indicate that increasing police on the job will
 increase the crime rate. 
 
