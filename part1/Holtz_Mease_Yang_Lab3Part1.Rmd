@@ -224,15 +224,29 @@ The probability of prison (`prbpris`) and average sentence length (`avgsen`) var
 
 ```{r}
 (Model1 <- lm(log(crmrte) ~ log(prbarr) + log(prbconv) + log(polpc), data=crime))
-summary(Model1)$r.squared
+sprintf('R²: %.3f', summary(Model1)$r.squared)
 ```
 
-The coefficient shows decrease prbarr by 1% will increase the crmrte by ~0.74%.  ~47% of variation in crmrte are explained by low probabilty of prbarr, prbconv and higher polpc.  The model has 90 random observations, the parameters are unknown, there is no colilinearity between each of the parameters.  The residual vs. fitted value plot shows the residuals apprear to be centered at 0, also we don't see any patterns in the residuals.  We transformed crmrte, prbarr and polpc to meet the homoskedasticity assumption
+The model coefficients imply that, all else being equal, an increase in probability of arrest (`prbarr`) of 1% is associated with ~0.74% decrease in the crime rate. Additinally, all else being equal, an increase in the probability of conviction given arrest (`prbconv`) of 1% is associated with a ~0.43% decrease in the crime reate. Surprisingly, it is also found that a 1% increase in police officers per capita is associated with a ~0.36% *increase* in crime rate. The model's R² value indicates that 47.4% of the variation in crime rate can be explained by these three factors alone.
+
+#### CLM Assumptions
+
+ 1. Population model is linear
+ 2. We have a random sample
+ 3. None of the variables are constant or have perfect collinearity
+ 4. E(u|x1, x2, ..., xk) = 0
+ 5. var(u|x1, x2, ..., xk) is independent of x's (homoskedasticity)
+ 6. u is independent of x's and normally distributed with zero mean
+
+The model has 90 random observations, the parameters are unknown, there is no colilinearity between each of the parameters.  The residual vs. fitted value plot shows the residuals apprear to be centered at 0, also we don't see any patterns in the residuals.  We transformed crmrte, prbarr and polpc to meet the homoskedasticity assumption
  
 ```{r}
 plot(Model1$fitted.values, Model1$residuals)
 ```
 
+```{r}
+hist(Model1$residuals)
+```
 
 ### Model 2
 
@@ -243,53 +257,53 @@ The second model includes the following terms:
  3. Natural log of police per capita (`polpc`)
  4. Natural log of percent minority in 1980 (`pctmin80`)
  5. Natural log of population density (`density`)
- 6. Average wage of federal employees (`wfed`)
- 7. Average wage of service industry employees (`wser`)
 
-The log of density term was added to Model 2 to improve accuracy because the exploratory data analysis revealed that there is a positive correlation between density and crime rate. This correlation has been noted by other researchers (Geoffrey West in "Scale: The Universal Laws of Growth, Innovation, Sustainability, and the Pace of Life in Organisms, Cities, Economies, and Companies"). This is a useful variable as policy makers could encourage development and housing policies that lead to lower population density such as improving transit options to suburban areas. 
+The log of density term was added to Model 2 to improve accuracy because the exploratory data analysis revealed that there is a positive correlation between density and crime rate. This correlation has been noted by other researchers (Geoffrey West in "Scale: The Universal Laws of Growth, Innovation, Sustainability, and the Pace of Life in Organisms, Cities, Economies, and Companies"). This is a useful variable as policy makers could encourage development and housing policies that lead to lower population density such as improving transit options to suburban areas.
 
-The average wage of federal employees was included as it was expected to add a degree of further accuracy to the model, but as most of the wage terms were colinear with density, most of the other wage terms were omitted purposely.
-
-The average wage of the service industry was included because among the wage variables it was unique for being negatively correlated with crime rates. Policy makers could view this as evidence for the value of increasing the minimum wage in the hopes of reducing crime.
-
+The log of the percent minority population was added to improve accuracy because, again, exploratory data analysis revealed that there is a positive correlation between and crime rate and this factor.
 
 ```{r}
-(Model2 = lm(log(crmrte) ~ log(prbarr) + log(prbconv) + log(polpc) + log(pctmin80) + log(density) + wfed + wser, data = crime))
-summary(Model2)
+(Model2 = lm(log(crmrte) ~ log(prbarr) + log(prbconv) + log(polpc) + log(pctmin80) + log(density), data = crime))
+sprintf('R²: %.3f', summary(Model2)$r.squared)
 ```
+The `prbarr`, `prbconv`, and `polpc` variables retain their same direction of associate as in Model 1, although the magnitiude of the associations are reduced somewhat. In addition, we see that a 1% increase in the percent minority population is associated with a ~0.25% increase in the crime rate, and that a 1% increase in the population density is associated with a ~0.28% increase in crime rate.
 
+The model's R² value indicates that 79.4% of the variation in crime rate can be explained by these 5 factors.
+
+#### CLM Assumptions
 Additional 15% of variations in crmrte are influeced by high density and 5% by wage types of wfed and wser.  As Density and urban are problematic, due to multicollinearity, correlation = .82.  We excluded urban when examine density. One type goes up the other type tends to go up, they can tend to split the effect among themselves. There is considerable amount of multicollinearity among the different wages.  Also density and wages have some multicollinearity, which make sense since jobs in the city tend to have higher wages.  we included only wfed and wser because we believe they have the most influence to crmrte. All 6 CLM assumptions are evaluated.  Density is transformed to meet the homoskedasticity assumption.  The residual vs. fitted value plot shows the residuals apprear to be centered at 0.
 
 ```{r}
 plot(Model2$fitted.values, Model2$residuals)
 ```
 
-
-
 ```{r}
-(Model2.1 = lm(log(crmrte) ~ log(prbarr) + prbconv + prbpris + log(polpc) + pctmin80 + urban, data = crime))
-summary(Model2.1)$r.square
+hist(Model2$residuals)
 ```
-Model2.1 was created to confirm if 'urban' was a better variable to use than 'density' as the two are colinear. Model2.1 is less accurate than Model2, so we will continue with Model2.
 
 ### Model 3
 
-Model 3 was constructed using every variable with the exception of the "west", "central", and "urban" variables. The analysts believed that these variables are already correlated with density and they do not have any intrinsic value in informing policy. 
+Model 3 was constructed using every variable with the exception of the "west", "central", and "urban" variables. We believed that these variables are already correlated with density and they do not have any intrinsic value in informing policy. 
 
 ```{r}
 (Model3 = lm(log(crmrte) ~  log(prbarr) + log(prbconv) + log(polpc) + log(pctmin80) + log(density) +
              log(prbpris) + log(pctymle) + avgsen + wser + county +  taxpc + wcon + wtuc + wtrd + wfir + wmfg + wfed + wsta + wloc + mix, data = crime))
 
-summary(Model3)
+sprintf('R²: %.3f', summary(Model3)$r.squared)
 ```
+
+By including all the remaining variables, the r-squared value of Model 3 improved by ~5% percentage points over Model 2. This compares with a ~32% percentage point improvement between Model 2 and Model 1. The analysts at Berkeley Analytica conclude that the improved fit of Model 3 is not justified by the additional data. In short, Model 2 is more valueable as Model 3 may be approaching over-fitting.
+
+### CLM Assumptions
+All 6 CLM assumptions are evaluated.  The residual vs. fitted value plot shows the residuals apprear to be more centered at 0.
 
 ```{r}
 plot(Model3$fitted.values, Model3$residuals)
 ```
 
-By including all the remaining variables, the r-squared value of Model 3 improved by [XX] percentage points over Model 2. This compares with a [YY] percentage point improvement between Model 2 and Model 1. The analysts at Berkeley Analytica conclude that the improved fit of Model 3 is not justified by the additional data. In short, Model 2 is more valueable as Model 3 may be approaching over-fitting.
-
-All 6 CLM assumptions are evaluated.  The residual vs. fitted value plot shows the residuals apprear to be more centered at 0.
+```{r}
+hist(Model2$residuals)
+```
 
 ### Models Table
 
