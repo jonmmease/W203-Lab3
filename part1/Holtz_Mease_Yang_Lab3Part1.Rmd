@@ -212,136 +212,95 @@ For policy makers, a positive correlation between minorities and crime could be 
 ## Regression Models
 
 ### Model 1
-Model with only the explanatory variables of key interest.
+Our first model includes the following explanatory variables of key interest to the political campaign: 
 
-prbarr(because lower chance of arrest can lead to more crime)
-prbconv and prbpris (for similar reason as prbarr)
-polpc has strong positive correlation with prbarr, pctmin80 is included for the reason of political campaign.
+ 1. Natural log of probability of arrest (`prbarr`)
+ 2. Natural log of probability of conviction given arrest (`prbconv`)
+ 3. Natural log of police per capita (`polpc`)
+ 
+These variables were selected as they are factors that a political operative can potentially influence, once they are in power.
 
-```{r}
-scatterplotMatrix(~log(crmrte)+log(prbarr), data = crime)
-```
-
-```{r}
-scatterplotMatrix(~log(crmrte)+log(polpc), data = crime)
-```
+The probability of prison (`prbpris`) and average sentence length (`avgsen`) variables are omitted purposely because they do not provide any meaningful predictive association with the crime rate. This observation is valuable for policy-makers as it could permit better decision making with respect to allocation of funds.
 
 ```{r}
-(Model1 <- lm(log(crmrte) ~ log(prbarr) + log(prbconv) + log(prbpris) + log(avgsen) + log(polpc), data=crime))
-summary(Model1)
+(Model1 <- lm(log(crmrte) ~ log(prbarr) + log(prbconv) + log(polpc), data=crime))
+summary(Model1)$r.squared
 ```
 
+The coefficient shows decrease prbarr by 1% will increase the crmrte by ~0.74%.  ~47% of variation in crmrte are explained by low probabilty of prbarr, prbconv and higher polpc.  The model has 90 random observations, the parameters are unknown, there is no colilinearity between each of the parameters.  The residual vs. fitted value plot shows the residuals apprear to be centered at 0, also we don't see any patterns in the residuals.  We transformed crmrte, prbarr and polpc to meet the homoskedasticity assumption
+ 
 ```{r}
 plot(Model1$fitted.values, Model1$residuals)
 ```
 
-# Model 1 includes the explanatory variables of key interest to the political 
-# campaign: 
-# 1. Probability of Arrest, transformed by taking the log
-# 2. Probability of Conviction
-# 3. Probability of Prison
-# 4. Police Per Capita, transformed by taking the log
-# These variables were selected as they are factors that a political operative
-# can influence, once they are in power. The average sentence length was 
-# omitted purposely because it did not have a meaningful correlation with crime
-# rates. This observation is valuable for policy-makers as it could permit
-# better decision making with respect to allocation of funds.
 
 ### Model 2
-adding density, wfed and wser to the key explanatory variables.
-Density and urban are problematic, due to multicollinearity, correlation = .82
-Wages - one type goes up the other type tends to go up, they can tend to split the effect among themselves. There is considerable amount of multicollinearity among the different wages.
-Also density and wages have some multicollinearity, which make sense since jobs in the city tend to have higher wages.
-Residuals apprear to be centered at 0, also we don’t see any patterns in the residuals
+
+The second model includes the following terms:
+
+ 1. Natural log of probability of arrest (`prbarr`)
+ 2. Natural log of probability of conviction given arrest (`prbconv`)
+ 3. Natural log of police per capita (`polpc`)
+ 4. Natural log of percent minority in 1980 (`pctmin80`)
+ 5. Natural log of population density (`density`)
+ 6. Average wage of federal employees (`wfed`)
+ 7. Average wage of service industry employees (`wser`)
+
+The log of density term was added to Model 2 to improve accuracy because the exploratory data analysis revealed that there is a positive correlation between density and crime rate. This correlation has been noted by other researchers (Geoffrey West in "Scale: The Universal Laws of Growth, Innovation, Sustainability, and the Pace of Life in Organisms, Cities, Economies, and Companies"). This is a useful variable as policy makers could encourage development and housing policies that lead to lower population density such as improving transit options to suburban areas. 
+
+The average wage of federal employees was included as it was expected to add a degree of further accuracy to the model, but as most of the wage terms were colinear with density, most of the other wage terms were omitted purposely.
+
+The average wage of the service industry was included because among the wage variables it was unique for being negatively correlated with crime rates. Policy makers could view this as evidence for the value of increasing the minimum wage in the hopes of reducing crime.
+
 
 ```{r}
-(Model2 = lm(log(crmrte) ~ log(prbarr) + log(prbconv) + log(prbpris) + log(polpc) + log(pctmin80) + log(density) + wfed + wser, data = crime))
-summary(Model2)$r.square
+(Model2 = lm(log(crmrte) ~ log(prbarr) + log(prbconv) + log(polpc) + log(pctmin80) + log(density) + wfed + wser, data = crime))
 summary(Model2)
 ```
+
+Additional 15% of variations in crmrte are influeced by high density and 5% by wage types of wfed and wser.  As Density and urban are problematic, due to multicollinearity, correlation = .82.  We excluded urban when examine density. One type goes up the other type tends to go up, they can tend to split the effect among themselves. There is considerable amount of multicollinearity among the different wages.  Also density and wages have some multicollinearity, which make sense since jobs in the city tend to have higher wages.  we included only wfed and wser because we believe they have the most influence to crmrte. All 6 CLM assumptions are evaluated.  Density is transformed to meet the homoskedasticity assumption.  The residual vs. fitted value plot shows the residuals apprear to be centered at 0.
 
 ```{r}
 plot(Model2$fitted.values, Model2$residuals)
 ```
 
-# Model 2 includes the following terms:
-# 1. Log of probability of arrest
-# 2. Probability of conviction
-# 3. Log of Police Per Capita
-# 4. Percent Minority
-# 5. Log of density
-# 6. Average wage of federal employees
-# 7. Average wage of service industry employees
 
-# The log of density term was added to Model 2 to improve accuracy
-# because the exploratory data analysis revealed that there is a
-# positive correlation between density and crime rate. This correlation
-# has been noted by other researchers (Geoffrey West in "Scale: The Universal 
-# Laws of Growth, Innovation, Sustainability, and the Pace of Life in 
-# Organisms, Cities, Economies, and Companies"). This is a useful variable as 
-# policy makers could encourage development and housing policies that lead 
-# to lower population density such as improving transit options to suburban 
-# areas. 
-
-# The average wage of federal employees was included as it was expected to
-# add a degree of further accuracy to the model, but as most of the wage terms
-# were colinear with density, most of the other wage terms were omitted purposely.
-
-# The average wage of the service industry was included because among the
-# wage variables it was unique for being negatively correlated with crime
-# rates. Policy makers could view this as evidence for the value of increasing
-# the minimum wage in the hopes of reducing crime.
 
 ```{r}
 (Model2.1 = lm(log(crmrte) ~ log(prbarr) + prbconv + prbpris + log(polpc) + pctmin80 + urban, data = crime))
 summary(Model2.1)$r.square
 ```
-# Model2.1 was created to confirm if 'urban' was a better 
-# variable to use than 'density' as the two are colinear.
-# Model2.1 is less accurate than Model2, so we will continue with 
-# Model2.
+Model2.1 was created to confirm if 'urban' was a better variable to use than 'density' as the two are colinear. Model2.1 is less accurate than Model2, so we will continue with Model2.
 
 ### Model 3
 
+Model 3 was constructed using every variable with the exception of the "west", "central", and "urban" variables. The analysts believed that these variables are already correlated with density and they do not have any intrinsic value in informing policy. 
+
 ```{r}
-(Model3 = lm(log(crmrte) ~ log(prbarr) + prbconv + prbpris + log(polpc) + pctmin80 + log(density) + wser + county + avgsen + taxpc + wcon + wtuc + wtrd + wfir + wmfg + wfed + wsta + wloc + mix + pctymle, data = crime))
-summary(Model3)$r.square
+(Model3 = lm(log(crmrte) ~  log(prbarr) + log(prbconv) + log(polpc) + log(pctmin80) + log(density) +
+             log(prbpris) + log(pctymle) + avgsen + wser + county +  taxpc + wcon + wtuc + wtrd + wfir + wmfg + wfed + wsta + wloc + mix, data = crime))
+
+summary(Model3)
 ```
 
 ```{r}
 plot(Model3$fitted.values, Model3$residuals)
 ```
 
-# Model 3 was constructed using every variable with the exception of the "west", "central", and "urban"
-# variables. The analysts believed that these variables are already correlated with density and 
-# they do not have any intrinsic value in informing policy. 
-# By including all the remaining variables, the r-squared value of Model 3 improved by 
-# 4.39 percentage points over Model 2. This compares with a 12 percentage point improvement between
-# Model 2 and Model 1. 
-# The analysts at Berkeley Analytica conclude that the improved fit of Model 3 is not justified 
-# by the additional data. In short, Model 2 is more valueable as Model 3 may be approaching over-fitting.
+By including all the remaining variables, the r-squared value of Model 3 improved by [XX] percentage points over Model 2. This compares with a [YY] percentage point improvement between Model 2 and Model 1. The analysts at Berkeley Analytica conclude that the improved fit of Model 3 is not justified by the additional data. In short, Model 2 is more valueable as Model 3 may be approaching over-fitting.
+
+All 6 CLM assumptions are evaluated.  The residual vs. fitted value plot shows the residuals apprear to be more centered at 0.
 
 ### Models Table
 
 ```{r}
-stargazer(Model1, Model2, Model2.1, Model3, type = "text", 
+stargazer(Model1, Model2, Model3, type = "text", 
           report = "vc", # Don't report errors, since we haven't covered them
           title = "Linear Models Predicting Crime Rate",
           keep.stat = c("rsq", "n"),
           omit.table.layout = "n",
           header=FALSE) # Omit more output related to errors
 ```
-
-### Observations
- - The predictive power of pctmin80 is very stable as additional factors are added to the model. Appears to be orthogonal to other features
- - Predictive power of density is decreased some when prob arrest/conviction are added to the model (There is some colinearity between density and these values)
- - prob arrest and conviction are not very correlated with each other and each independently is associated with a decrease in crime
- - polpc correlates positively with ave sentence.
-
-Maybe policy to shift people toward lower density:
-
-TODO: interpret
-TODO: State/Evaluate CLM assumptions.
 
 ## Omitted Variables Discussion
 Need some discussion about `pctmin80` result. We don't have information on the demographics of those being convicted of crimes, 
