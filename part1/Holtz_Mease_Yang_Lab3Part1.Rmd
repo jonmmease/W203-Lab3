@@ -209,6 +209,9 @@ Based on the slope and R² statistic of the best-fit line we see that a 1% incre
 
 For policy makers, a positive correlation between minorities and crime could be useful evidence to support policies that would lead to greater integration of cultural groups into every neighborhood. Similarly, a positive relationship between young males and crime could be used to justify funding for programs that help young males stay occupied and away from criminal elements.
 
+#### Classical Linear Model Assumptions
+We are now in a position to evaluate the first three classicial linear model assumptions. First, the linearity observed above between the transformed key relationship variables and the transformed crime rate gives us reasonable confidence that the true relationship between these variables is approximately linear. Second, the sample under consideration is a cross section of counties in North Carolina and is assumed to be a true random sample of the population of North Carolina counties. Third, our exploratory analysis found no perfect collinearity between the variables of key interest.
+
 ## Regression Models
 
 ### Model 1
@@ -229,21 +232,14 @@ sprintf('R²: %.3f', summary(Model1)$r.squared)
 
 The model coefficients imply that, all else being equal, an increase in probability of arrest (`prbarr`) of 1% is associated with ~0.74% decrease in the crime rate. Additinally, all else being equal, an increase in the probability of conviction given arrest (`prbconv`) of 1% is associated with a ~0.43% decrease in the crime reate. Surprisingly, it is also found that a 1% increase in police officers per capita is associated with a ~0.36% *increase* in crime rate. The model's R² value indicates that 47.4% of the variation in crime rate can be explained by these three factors alone.
 
-#### CLM Assumptions
-
- 1. Population model is linear
- 2. We have a random sample
- 3. None of the variables are constant or have perfect collinearity
- 4. E(u|x1, x2, ..., xk) = 0
- 5. var(u|x1, x2, ..., xk) is independent of x's (homoskedasticity)
- 6. u is independent of x's and normally distributed with zero mean
-
-The model has 90 random observations, the parameters are unknown, there is no colilinearity between each of the parameters.  The residual vs. fitted value plot shows the residuals apprear to be centered at 0, also we don't see any patterns in the residuals.  We transformed crmrte, prbarr and polpc to meet the homoskedasticity assumption
+#### Classical Linear Model Assumptions
+The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values.
  
 ```{r}
 plot(Model1$fitted.values, Model1$residuals)
 ```
 
+This histogram of residuals shows that the residulas are distributed approximately normally with mean 0 (with the exception of a few outlying points with larger negative residuals).
 ```{r}
 hist(Model1$residuals)
 ```
@@ -270,12 +266,14 @@ The `prbarr`, `prbconv`, and `polpc` variables retain their same direction of as
 
 The model's R² value indicates that 79.4% of the variation in crime rate can be explained by these 5 factors.
 
-#### CLM Assumptions
-Additional 15% of variations in crmrte are influeced by high density and 5% by wage types of wfed and wser.  As Density and urban are problematic, due to multicollinearity, correlation = .82.  We excluded urban when examine density. One type goes up the other type tends to go up, they can tend to split the effect among themselves. There is considerable amount of multicollinearity among the different wages.  Also density and wages have some multicollinearity, which make sense since jobs in the city tend to have higher wages.  we included only wfed and wser because we believe they have the most influence to crmrte. All 6 CLM assumptions are evaluated.  Density is transformed to meet the homoskedasticity assumption.  The residual vs. fitted value plot shows the residuals apprear to be centered at 0.
+#### Classical Linear Model Assumptions
+The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values.
 
 ```{r}
 plot(Model2$fitted.values, Model2$residuals)
 ```
+
+This histogram of residuals shows that the residulas are distributed normally with mean 0.
 
 ```{r}
 hist(Model2$residuals)
@@ -294,12 +292,14 @@ sprintf('R²: %.3f', summary(Model3)$r.squared)
 
 By including all the remaining variables, the r-squared value of Model 3 improved by ~5% percentage points over Model 2. This compares with a ~32% percentage point improvement between Model 2 and Model 1. The analysts at Berkeley Analytica conclude that the improved fit of Model 3 is not justified by the additional data. In short, Model 2 is more valueable as Model 3 may be approaching over-fitting.
 
-### CLM Assumptions
-All 6 CLM assumptions are evaluated.  The residual vs. fitted value plot shows the residuals apprear to be more centered at 0.
+#### CLM Assumptions
+The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values.
 
 ```{r}
 plot(Model3$fitted.values, Model3$residuals)
 ```
+
+This histogram of residuals shows that the residulas are distributed approximatley normally with mean 0, although there is a slight negative skew.
 
 ```{r}
 hist(Model2$residuals)
