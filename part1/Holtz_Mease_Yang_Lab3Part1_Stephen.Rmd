@@ -409,9 +409,21 @@ stargazer(Model1, Model2, Model3, type = "text",
 ## Omitted Variables Discussion
 Need some discussion about `pctmin80` result. We don't have information on the demographics of those being convicted of crimes, 
 
-And `polpc` influence is counter-intuitive. Why is there a positive relationship between police per capita and crime?
+The results from the polpc (Police percapita) variable is counterintuitive at first glance. However, on further 
+examination, it becomes clear that both crime rate and police percapita increase with increasing density, however,
+crime rate increases faster with density than police percapita. The net result is that there is a positive 
+correlation between police and crime. This does not, however, indicate that increasing police on the job will
+increase the crime rate. 
 
 ## Conclusion
-Political platform of pushing for more/faster arrest/convictions with no or shorter prison sentences. Deterrent seems to be in arrest/conviction, not as much in being sent to prison, or based on how long a prison sentence is.
+Based on analysis of the data in this study, the political campaign could argue that to decrease crime rates, policing should be 
+geared towards more and faster arrests. Similarly, the criminal justice system should be geared towards more and faster convictions 
+with shorter prison sentences. Shortening prison sentences would allow for funds to be freed for use in other areas. The deterrent seems to 
+be in arrests and conviction, not as much in being sent to prison, or based on how long a prison sentence is.
 
-Further studies needed to understand
+Similarly, the political campaign could push for funding programs that keep young males busy and away from criminal elements.
+
+Further studies are needed to understand if value is created for society by having a lower population density and if this value could be
+realized by improving transportation options to allow for more suburban developments in favor of urban developments.
+
+Finally, further studies could be performed to see if improving the mix of minorities in neighborhoods helps to reduce crime rates.
