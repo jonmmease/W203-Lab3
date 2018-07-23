@@ -99,13 +99,13 @@ summary(crime$crmrte)
 The histogram of `crmrte` confirms the skew and also shows that the distribution of `crmrte` is unimodal.
 
 ```{r}
-hist(crime$crmrte)
+hist(crime$crmrte, main = "Histogram of crime rate")
 ```
 
 We note that the skew is almost entirely eliminated by taking the natural log of `crmrte`.
 
 ```{r}
-hist(log(crime$crmrte))
+hist(log(crime$crmrte), main = "Histogram of the log of crime rate")
 ```
 
 Based on this, we define our outcome variable as the natrual log of `crmrte`. This means that the models we build in this report will describe percentage (not absolute) changes to the crime rate.
@@ -124,13 +124,13 @@ summary(crime$density)
 The histogram of `density` confirms the large positive skew and shows that it has a unimodal distribution peaked at around 0.5-1.0 persons per square mile. 
 
 ```{r}
-hist(crime$density, breaks = 15)
+hist(crime$density, breaks = 15, main = "Histogram of population density")
 ```
 
  We will use the natural log of `density` as our explanatory variable as it is significantly less skewed than `density` itself.
 
 ```{r}
-hist(log(crime$density), breaks = 15)
+hist(log(crime$density), breaks = 15, main = "Histogram of the log of population density")
 ```
 
 In a scatter plot with our outcome variable we note a positive relationship between percentage change in population density and percentage change in crime rate.
@@ -154,12 +154,12 @@ We believe that probability of arrest is worth investigating as it will inform p
 
 The histogram of the `prbarr` variable shows that the distribution is unimodal with a slight positive skew.
 ```{r}
-hist(crime$prbarr, breaks = 10)
+hist(crime$prbarr, breaks = 10, main = "Histogram of probability of arrest")
 ```
 
 Taking the log transform removes the skew altogether, and so we will use the natural log of `prbarr` as an explanotory variable.
 ```{r}
-hist(log(crime$prbarr), breaks = 10)
+hist(log(crime$prbarr), breaks = 10, main = "Histogram of the log of the probability of arrest")
 ```
 
 In a scatter plot with our outcome variable we note a negative relationship between percentage change in probability of arrest and percentage change in crime rate.
@@ -236,12 +236,12 @@ The model coefficients imply that, all else being equal, an increase in probabil
 The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values.
  
 ```{r}
-plot(Model1$fitted.values, Model1$residuals)
+plot(Model1$fitted.values, Model1$residuals, main = 'Residuals and fitted values: Model 1')
 ```
 
 This histogram of residuals shows that the residulas are distributed approximately normally with mean 0 (with the exception of a few outlying points with larger negative residuals).
 ```{r}
-hist(Model1$residuals)
+hist(Model1$residuals, main = 'Histogram of residuals: Model 1')
 ```
 
 ### Model 2
@@ -270,13 +270,13 @@ The model's R² value indicates that 79.4% of the variation in crime rate can be
 The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values.
 
 ```{r}
-plot(Model2$fitted.values, Model2$residuals)
+plot(Model2$fitted.values, Model2$residuals, main = 'Residuals and fitted values: Model 2')
 ```
 
 This histogram of residuals shows that the residulas are distributed normally with mean 0.
 
 ```{r}
-hist(Model2$residuals)
+hist(Model2$residuals, main = 'Histogram of residuals: Model 2')
 ```
 
 ### Model 3
@@ -296,13 +296,13 @@ By including all the remaining variables, the r-squared value of Model 3 improve
 The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values.
 
 ```{r}
-plot(Model3$fitted.values, Model3$residuals)
+plot(Model3$fitted.values, Model3$residuals, main = 'Residuals and fitted values: Model 3')
 ```
 
 This histogram of residuals shows that the residulas are distributed approximatley normally with mean 0, although there is a slight negative skew.
 
 ```{r}
-hist(Model2$residuals)
+hist(Model3$residuals, main = 'Histogram of residuals: Model 3')
 ```
 
 ### Models Table
