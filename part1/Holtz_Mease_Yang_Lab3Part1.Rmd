@@ -30,7 +30,7 @@ value of laws and funding decisions viewed through the lens of reducing
 crime. Specific policy questions include, providing funding for more 
 police officers; setting guidance or requirements for sentencing of criminals;
 implementing policies that improve the distribution of minorities across 
-neighborhoods; and implimenting policies that keep young males occupued and
+neighborhoods; and implementing policies that keep young males occupied and
 out of trouble. 
 The secondary objective of this project will be to identify other factors
 that affect crime that policy makers could account for in formulating a 
@@ -42,7 +42,7 @@ First we will load and examine the data set.
 crime_raw <- read.csv("../data/crime_v2.csv")
 ```
 
-We note that the last 6 rows of the dataset are `NA` in all columns except `prbconv`. According to the codebook `prbconv` is a numeric variable representing the probability of conviction, but it has been loaded as a factor due to the presence of a backtick string character present in row 97.
+We note that the last 6 rows of the dataset are `NA` in all columns except `prbconv`. According to the code book `prbconv` is a numeric variable representing the probability of conviction, but it has been loaded as a factor due to the presence of a backtick string character present in row 97.
 
 ```{r}
 tail(crime_raw[,1:6], 10)
@@ -59,7 +59,7 @@ Next we examine the probability variables `prbarr` (The 'probability' of arrest)
 ```{r}
 summary(crime[,c('prbarr', 'prbconv', 'prbpris')])
 ```
-Here we see that all probability values are non-negative, but `prbarr` and `prbconv` each have values that are greater than one and therefore not valid probabilities. However, the codebook states that "the probability of arrest is proxied by the ratio of arrests to offenses" and "the probability of conviction is proxied by the ratio of convictions to arrests". By these caclulations, it is plausible that these probability proxy variables will have values larger than one, so we do not omin these observations.
+Here we see that all probability values are non-negative, but `prbarr` and `prbconv` each have values that are greater than one and therefore not valid probabilities. However, the code book states that "the probability of arrest is proxied by the ratio of arrests to offenses" and "the probability of conviction is proxied by the ratio of convictions to arrests". By these calculations, it is plausible that these probability proxy variables will have values larger than one, so we do not omit these observations.
 
 Next, we identify an unreasonably anomalous value for the service industry wage, `wser`, in row 84 for county 185.
 
@@ -67,14 +67,14 @@ Next, we identify an unreasonably anomalous value for the service industry wage,
 plot(crime$wser, main = 'Service industry weekly wage')
 ```
 
-This extreme value (2177.0681) is 860% of the median (253.2) and 556% of the second largest wage in the dataset (391.3081).  Since the other remaining properties for this observation are all in reasonable ranges, with respect to the other observations in the sample, we will replace the anomolous value with `NA` rather than remove the entire observation.
+This extreme value (2177.0681) is 860% of the median (253.2) and 556% of the second largest wage in the dataset (391.3081).  Since the other remaining properties for this observation are all in reasonable ranges, with respect to the other observations in the sample, we will replace the anomalous value with `NA` rather than remove the entire observation.
 
 ```{r}
 crime$wser[84] = NA
 ```
 
 
-There is a single unreasonably low value of the `density` variable, which we can identify by ploting density on a log scale.
+There is a single unreasonably low value of the `density` variable, which we can identify by plotting density on a log scale.
 
 ```{r}
 plot(log(crime$density), main = 'Population density (people per square mile)')
@@ -87,7 +87,7 @@ crime$density[79] = NA
 ```
 ## The Model Building Process
 
-To investigate our research question the outcome variable of this anlysis will be based on the `crmrte` variable.
+To investigate our research question the outcome variable of this analysis will be based on the `crmrte` variable.
 
 ### Outcome variable: `crmrte`
 
@@ -108,7 +108,7 @@ We note that the skew is almost entirely eliminated by taking the natural log of
 hist(log(crime$crmrte), main = "Histogram of the log of crime rate")
 ```
 
-Based on this, we define our outcome variable as the natrual log of `crmrte`. This means that the models we build in this report will describe percentage (not absolute) changes to the crime rate.
+Based on this, we define our outcome variable as the natural log of `crmrte`. This means that the models we build in this report will describe percentage (not absolute) changes to the crime rate.
 
 
 ### Explanatory variables
@@ -157,7 +157,7 @@ The histogram of the `prbarr` variable shows that the distribution is unimodal w
 hist(crime$prbarr, breaks = 10, main = "Histogram of probability of arrest")
 ```
 
-Taking the log transform removes the skew altogether, and so we will use the natural log of `prbarr` as an explanotory variable.
+Taking the log transform removes the skew altogether, and so we will use the natural log of `prbarr` as an explanatory variable.
 ```{r}
 hist(log(crime$prbarr), breaks = 10, main = "Histogram of the log of the probability of arrest")
 ```
@@ -172,7 +172,7 @@ legend('bottomright', legend=r2_text(model.prbarr))
 ```
 Based on the slope and R² statistic of the best-fit line we see that a 1% increase in probability of arrest is associated with a ~0.59% decrease in the crime rate, and that probability of arrest by itself can predict 19% of the variation in crime rate across the state.
 
-Based on similar observations, we also apply a natural log transformation to the probabiliy of conviction (`prbconv`) and probability of prison sentence (`prbpris`) variables.
+Based on similar observations, we also apply a natural log transformation to the probability of conviction (`prbconv`) and probability of prison sentence (`prbpris`) variables.
 
 #### Police officers per capita: `polpc`
 
@@ -210,7 +210,7 @@ Based on the slope and R² statistic of the best-fit line we see that a 1% incre
 For policy makers, a positive correlation between minorities and crime could be useful evidence to support policies that would lead to greater integration of cultural groups into every neighborhood. Similarly, a positive relationship between young males and crime could be used to justify funding for programs that help young males stay occupied and away from criminal elements.
 
 #### Classical Linear Model Assumptions
-We are now in a position to evaluate the first three classicial linear model assumptions. First, the linearity observed above between the transformed key relationship variables and the transformed crime rate gives us reasonable confidence that the true relationship between these variables is approximately linear. Second, the sample under consideration is a cross section of counties in North Carolina and is assumed to be a true random sample of the population of North Carolina counties. Third, our exploratory analysis found no perfect collinearity between the variables of key interest.
+We are now in a position to evaluate the first three classical linear model assumptions. First, the linearity observed above between the transformed key relationship variables and the transformed crime rate gives us reasonable confidence that the true relationship between these variables is approximately linear. Second, the sample under consideration is a cross section of counties in North Carolina and is assumed to be a true random sample of the population of North Carolina counties. Third, our exploratory analysis found no perfect collinearity between the variables of key interest.
 
 ## Regression Models
 
@@ -230,7 +230,7 @@ The probability of prison (`prbpris`) and average sentence length (`avgsen`) var
 sprintf('R²: %.3f', summary(Model1)$r.squared)
 ```
 
-The model coefficients imply that, all else being equal, an increase in probability of arrest (`prbarr`) of 1% is associated with ~0.74% decrease in the crime rate. Additinally, all else being equal, an increase in the probability of conviction given arrest (`prbconv`) of 1% is associated with a ~0.43% decrease in the crime reate. Surprisingly, it is also found that a 1% increase in police officers per capita is associated with a ~0.36% *increase* in crime rate. The model's R² value indicates that 47.4% of the variation in crime rate can be explained by these three factors alone.
+The model coefficients imply that, all else being equal, an increase in probability of arrest (`prbarr`) of 1% is associated with ~0.74% decrease in the crime rate. Additionally, all else being equal, an increase in the probability of conviction given arrest (`prbconv`) of 1% is associated with a ~0.43% decrease in the crime rate. Surprisingly, it is also found that a 1% increase in police officers per capita is associated with a ~0.36% *increase* in crime rate. The model's R² value indicates that 47.4% of the variation in crime rate can be explained by these three factors alone.
 
 #### Classical Linear Model Assumptions
 The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values.
@@ -239,7 +239,7 @@ The residual vs. fitted value plot shows the residuals are centered on 0 (exogen
 plot(Model1$fitted.values, Model1$residuals, main = 'Residuals and fitted values: Model 1')
 ```
 
-This histogram of residuals shows that the residulas are distributed approximately normally with mean 0 (with the exception of a few outlying points with larger negative residuals).
+This histogram of residuals shows that the residuals are distributed approximately normally with mean 0 (with the exception of a few outlying points with larger negative residuals).
 ```{r}
 hist(Model1$residuals, main = 'Histogram of residuals: Model 1')
 ```
@@ -262,7 +262,7 @@ The log of the percent minority population was added to improve accuracy because
 (Model2 = lm(log(crmrte) ~ log(prbarr) + log(prbconv) + log(polpc) + log(pctmin80) + log(density), data = crime))
 sprintf('R²: %.3f', summary(Model2)$r.squared)
 ```
-The `prbarr`, `prbconv`, and `polpc` variables retain their same direction of associate as in Model 1, although the magnitiude of the associations are reduced somewhat. In addition, we see that a 1% increase in the percent minority population is associated with a ~0.25% increase in the crime rate, and that a 1% increase in the population density is associated with a ~0.28% increase in crime rate.
+The `prbarr`, `prbconv`, and `polpc` variables retain their same direction of associate as in Model 1, although the magnitude of the associations are reduced somewhat. In addition, we see that a 1% increase in the percent minority population is associated with a ~0.25% increase in the crime rate, and that a 1% increase in the population density is associated with a ~0.28% increase in crime rate.
 
 The model's R² value indicates that 79.4% of the variation in crime rate can be explained by these 5 factors.
 
@@ -273,7 +273,7 @@ The residual vs. fitted value plot shows the residuals are centered on 0 (exogen
 plot(Model2$fitted.values, Model2$residuals, main = 'Residuals and fitted values: Model 2')
 ```
 
-This histogram of residuals shows that the residulas are distributed normally with mean 0.
+This histogram of residuals shows that the residuals are distributed normally with mean 0.
 
 ```{r}
 hist(Model2$residuals, main = 'Histogram of residuals: Model 2')
@@ -290,7 +290,7 @@ Model 3 was constructed using every variable with the exception of the "west", "
 sprintf('R²: %.3f', summary(Model3)$r.squared)
 ```
 
-By including all the remaining variables, the r-squared value of Model 3 improved by ~5% percentage points over Model 2. This compares with a ~32% percentage point improvement between Model 2 and Model 1. The analysts at Berkeley Analytica conclude that the improved fit of Model 3 is not justified by the additional data. In short, Model 2 is more valueable as Model 3 may be approaching over-fitting.
+By including all the remaining variables, the r-squared value of Model 3 improved by ~5% percentage points over Model 2. This compares with a ~32% percentage point improvement between Model 2 and Model 1. The analysts at Berkeley Analytica conclude that the improved fit of Model 3 is not justified by the additional data. In short, Model 2 is more valuable as Model 3 may be approaching over-fitting.
 
 #### CLM Assumptions
 The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values.
@@ -299,7 +299,7 @@ The residual vs. fitted value plot shows the residuals are centered on 0 (exogen
 plot(Model3$fitted.values, Model3$residuals, main = 'Residuals and fitted values: Model 3')
 ```
 
-This histogram of residuals shows that the residulas are distributed approximatley normally with mean 0, although there is a slight negative skew.
+This histogram of residuals shows that the residuals are distributed approximately normally with mean 0, although there is a slight negative skew.
 
 ```{r}
 hist(Model3$residuals, main = 'Histogram of residuals: Model 3')
@@ -319,7 +319,7 @@ stargazer(Model1, Model2, Model3, type = "text",
 ## Omitted Variables Discussion
 Need some discussion about `pctmin80` result. We don't have information on the demographics of those being convicted of crimes, 
 
-And `polpc` influence is counterintuitive. Why is there a positive relationship between police per capita and crime?
+And `polpc` influence is counter-intuitive. Why is there a positive relationship between police per capita and crime?
 
 ## Conclusion
 Political platform of pushing for more/faster arrest/convictions with no or shorter prison sentences. Deterrent seems to be in arrest/conviction, not as much in being sent to prison, or based on how long a prison sentence is.
