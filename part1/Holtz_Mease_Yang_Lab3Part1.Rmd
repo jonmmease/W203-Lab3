@@ -39,16 +39,7 @@ strategy to reduce crime.
 ## Initial Data Loading and Cleaning
 First we will load and examine the data set.
 ```{r}
-<<<<<<< HEAD
-library(car)
-install.packages("stargazer")
-library(stargazer)
-setwd("C:/Users/Holtz/Documents/Berkeley/203 Stats & R/Lab 3")
-getwd()
-crime_raw <- read.csv("crime_v2.csv")
-=======
 crime_raw <- read.csv("../data/crime_v2.csv")
->>>>>>> 6c0c2497e610a7dde50b8e428660ce2647f460e7
 ```
 
 We note that the last 6 rows of the dataset are `NA` in all columns except `prbconv`. According to the code book `prbconv` is a numeric variable representing the probability of conviction, but it has been loaded as a factor due to the presence of a backtick string character present in row 97.
@@ -273,22 +264,7 @@ sprintf('R²: %.3f', summary(Model2)$r.squared)
 ```
 The `prbarr`, `prbconv`, and `polpc` variables retain their same direction of associate as in Model 1, although the magnitude of the associations are reduced somewhat. In addition, we see that a 1% increase in the percent minority population is associated with a ~0.25% increase in the crime rate, and that a 1% increase in the population density is associated with a ~0.28% increase in crime rate.
 
-<<<<<<< HEAD
-## Model 1 Discussion
-Model 1 includes the explanatory variables of key interest to the political 
-campaign: 
-1. Probability of Arrest, transformed by taking the log
-2. Probability of Conviction
-3. Probability of Prison
-4. Police Per Capita, transformed by taking the log
-These variables were selected as they are factors that a political operative
-can influence, once they are in power. The average sentence length was 
-omitted purposely because it did not have a meaningful correlation with crime
-rates. This observation is valuable for policy-makers as it could permit
-better decision making with respect to allocation of funds.
-=======
 The model's R² value indicates that 79.4% of the variation in crime rate can be explained by these 5 factors.
->>>>>>> 6c0c2497e610a7dde50b8e428660ce2647f460e7
 
 #### Classical Linear Model Assumptions
 The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values.
@@ -297,53 +273,11 @@ The residual vs. fitted value plot shows the residuals are centered on 0 (exogen
 plot(Model2$fitted.values, Model2$residuals, main = 'Residuals and fitted values: Model 2')
 ```
 
-<<<<<<< HEAD
-```{r}
-plot(Model2$fitted.values, Model2$residuals)
-```
-
-## Model 2 Discussion
-Model 2 includes the following terms:
-1. Log of probability of arrest
-2. Probability of conviction
-3. Log of Police Per Capita
-4. Percent Minority
-5. Log of density
-6. Average wage of federal employees
-7. Average wage of service industry employees
-
-The log of density term was added to Model 2 to improve accuracy
-because the exploratory data analysis revealed that there is a
-positive correlation between density and crime rate. This correlation
-has been noted by other researchers (Geoffrey West in "Scale: The Universal 
-Laws of Growth, Innovation, Sustainability, and the Pace of Life in 
-Organisms, Cities, Economies, and Companies"). This is a useful variable as 
-policy makers could encourage development and housing policies that lead 
-to lower population density such as improving transit options to suburban 
-areas. 
-
-The average wage of federal employees was included as it was expected to
-add a degree of further accuracy to the model, but as most of the wage terms
-were colinear with density, most of the other wage terms were omitted purposely.
-
-The average wage of the service industry was included because among the
-wage variables it was unique for being negatively correlated with crime
-rates. Policy makers could view this as evidence for the value of increasing
-the minimum wage in the hopes of reducing crime.
-=======
 This histogram of residuals shows that the residuals are distributed normally with mean 0.
->>>>>>> 6c0c2497e610a7dde50b8e428660ce2647f460e7
 
 ```{r}
 hist(Model2$residuals, main = 'Histogram of residuals: Model 2')
 ```
-<<<<<<< HEAD
-Model2.1 was created to confirm if 'urban' was a better 
-variable to use than 'density' as the two are colinear.
-Model2.1 is less accurate than Model2, so we will continue with 
-Model2.
-=======
->>>>>>> 6c0c2497e610a7dde50b8e428660ce2647f460e7
 
 ### Model 3
 
@@ -365,23 +299,11 @@ The residual vs. fitted value plot shows the residuals are centered on 0 (exogen
 plot(Model3$fitted.values, Model3$residuals, main = 'Residuals and fitted values: Model 3')
 ```
 
-<<<<<<< HEAD
-## Model 3 Discussion
-Model 3 was constructed using every variable with the exception of the "west", "central", and "urban"
-variables. The analysts believed that these variables are already correlated with density and 
-they do not have any intrinsic value in informing policy. 
-By including all the remaining variables, the r-squared value of Model 3 improved by 
-4.39 percentage points over Model 2. This compares with a 12 percentage point improvement between
-Model 2 and Model 1. 
-The analysts at Berkeley Analytica conclude that the improved fit of Model 3 is not justified 
-by the additional data. In short, Model 2 is more valueable as Model 3 may be approaching over-fitting.
-=======
 This histogram of residuals shows that the residuals are distributed approximately normally with mean 0, although there is a slight negative skew.
 
 ```{r}
 hist(Model3$residuals, main = 'Histogram of residuals: Model 3')
 ```
->>>>>>> 6c0c2497e610a7dde50b8e428660ce2647f460e7
 
 ### Models Table
 
@@ -394,21 +316,7 @@ stargazer(Model1, Model2, Model3, type = "text",
           header=FALSE) # Omit more output related to errors
 ```
 
-<<<<<<< HEAD
-```
-
-### Observations
- - The predictive power of pctmin80 is very stable as additional factors are added to the model. Appears to be orthogonal to other features
- - Predictive power of density is decreased some when prob arrest/conviction are added to the model (There is some colinearity between density and these values)
- - prob arrest and conviction are not very correlated with each other and each independently is associated with a decrease in crime
- - polpc correlates positively with ave sentence.
-
-
-=======
->>>>>>> 6c0c2497e610a7dde50b8e428660ce2647f460e7
 ## Omitted Variables Discussion
-Need some discussion about `pctmin80` result. We don't have information on the demographics of those being convicted of crimes, 
-
 The results from the polpc (Police percapita) variable is counterintuitive at first glance. However, on further 
 examination, it becomes clear that both crime rate and police percapita increase with increasing density, however,
 crime rate increases faster with density than police percapita. The net result is that there is a positive 
