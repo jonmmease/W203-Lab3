@@ -12,6 +12,8 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(car)
+library(lmtest)
+library(sandwich)
 library(stargazer)
 ```
 
@@ -40,7 +42,8 @@ strategy to reduce crime.
 ## Initial Data Loading and Cleaning
 First we will load and examine the data set.
 ```{r}
-crime_raw <- read.csv("../data/crime_v2.csv")
+#crime_raw <- read.csv("../data/crime_v2.csv")
+crime_raw <- read.csv("crime_v2.csv")
 ```
 
 We note that the last 6 rows of the dataset are `NA` in all columns except `prbconv`. According to the code book `prbconv` is a numeric variable representing the probability of conviction, but it has been loaded as a factor due to the presence of a backtick string character present in row 97.
@@ -224,12 +227,18 @@ Based on the slope and R² statistic of the best-fit line we see that a 1% incre
 
 For policy makers, a positive correlation between minorities and crime could be useful evidence to support policies that would lead to greater integration of cultural groups into every neighborhood. Similarly, a positive relationship between young males and crime could be used to justify funding for programs that help young males stay occupied and away from criminal elements.
 
-#### Classical Linear Model Assumptions
-We are now in a position to evaluate the first three classical linear model assumptions. First, the linearity observed above between the transformed key relationship variables and the transformed crime rate gives us reasonable confidence that the true relationship between these variables is approximately linear. Second, the sample under consideration is a cross section of counties in North Carolina and is assumed to be a true random sample of the population of North Carolina counties. Third, our exploratory analysis found no perfect collinearity between the variables of key interest.
+### Classical Linear Model Assumptions
+
+#### CLM 1 - Linear in parameters, CLM 2 - Random sampling, CLM 3 - No Multicollinearity
+
+We are now in a position to evaluate the first three classical linear model assumptions. First, the linearity observed above between the transformed key relationship variables and the transformed crime rate gives us reasonable confidence that the true relationship between these variables is approximately linear. Second, the sample under consideration is a cross section of counties in North Carolina and is assumed to be a true random sample of the population of North Carolina counties. xxxxxx
+Examine more on the source of the dataxxxxxxx  Third, our exploratory analysis found no perfect collinearity between the variables of key interest.
+
 
 ## Regression Models
 
 ### Model 1
+
 Our first model includes the following explanatory variables of key interest to the political campaign: 
 
  1. Natural log of probability of arrest (`prbarr`)
@@ -247,19 +256,50 @@ sprintf('R²: %.3f', summary(Model1)$r.squared)
 
 The model coefficients imply that, all else being equal, an increase in probability of arrest (`prbarr`) of 1% is associated with ~0.74% decrease in the crime rate. Additionally, all else being equal, an increase in the probability of conviction given arrest (`prbconv`) of 1% is associated with a ~0.43% decrease in the crime rate. Surprisingly, it is also found that a 1% increase in police officers per capita is associated with a ~0.36% *increase* in crime rate. The model's R² value indicates that 47.4% of the variation in crime rate can be explained by these three factors alone.
 
-#### Classical Linear Model Assumptions
-The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values.
+#### CLM 4 - Zero conditional mean
+#### CLM 5 - Homoscedasticity
+
+The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values, except few values at the higher end.  The results show mixed evidence.
+
+#### CLM 6 - Normality of error terms
+Using histogram or Q-Q plots of the residuals to observe the normality.  This histogram of residuals shows that the residuals are distributed approximately normally with mean 0 (with the exception of a few outlying points with larger negative residuals). 
  
 ```{r}
-plot(Model1$fitted.values, Model1$residuals,
-     main = 'Residuals and fitted values: Model 1')
+plot(Model1)
+
+#spreadLevelPlot(Model1)
+#plot(Model1$fitted.values, Model1$residuals, main = 'Residuals and fitted values: Model 1')
 ```
 
-This histogram of residuals shows that the residuals are distributed approximately normally with mean 0 (with the exception of a few outlying points with larger negative residuals).
 
 ```{r}
-hist(Model1$residuals, main = 'Histogram of residuals: Model 1')
+# normality of standard residuals
+stdr = rstandard(Model1)
+hist(stdr, main="Standard residuals", breaks = 100, freq=FALSE) 
+curve(dnorm(x, mean=0, sd=sd(stdr)), col="red", lwd=2, add=TRUE) 
+
+# normality of studentized residuals
+stur = rstudent(Model1)
+hist(stur, main="Studentized residuals", breaks = 100, freq=FALSE) 
+curve(dnorm(x, mean=0, sd=sd(stdr)), col="red", lwd=2, add=TRUE) 
+
+qqPlot(stdr, distribution="norm", pch=20, main="QQ-Plot standard residuals") 
+qqline(stdr, col="red", lwd=2)
+
+qqPlot(stur, distribution="norm", pch=20, main="QQ-Plot studentized residuals") 
+qqline(stur, col="red", lwd=2)
+
+#t test of coefficients
+coeftest(Model1, vcov = vcovHC) 
+
+#vcovHC(Model1)
+
+(se.Model1 = sqrt(diag(vcovHC(Model1))))
+#summary(Model1)
+
 ```
+
+
 
 ### Model 2
 
