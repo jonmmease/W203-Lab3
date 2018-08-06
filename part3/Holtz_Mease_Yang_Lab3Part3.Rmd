@@ -43,7 +43,6 @@ strategy to reduce crime.
 First we will load and examine the data set.
 ```{r}
 crime_raw <- read.csv("../data/crime_v2.csv")
-#crime_raw <- read.csv("crime_v2.csv")
 ```
 
 We note that the last 6 rows of the dataset are `NA` in all columns except `prbconv`. According to the code book `prbconv` is a numeric variable representing the probability of conviction, but it has been loaded as a factor due to the presence of a backtick string character present in row 97.
