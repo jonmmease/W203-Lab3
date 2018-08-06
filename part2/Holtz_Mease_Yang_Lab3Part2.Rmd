@@ -362,7 +362,8 @@ stargazer(Model1, Model2, Model3, type = "latex",
           omit.stat=c('f', 'adj.rsq'),
           star.cutoffs = c(0.05, 0.01, 0.001),
           se = list(se.Model1, se.Model2, se.Model3),
-          omit.table.layout = "n",
+          omit = c('wcon', 'wtuc', 'wtrd', 'wfir', 'wmfg'),
+          #omit.table.layout = "n",
           header=FALSE) # Omit more output related to errors
 ```
 
