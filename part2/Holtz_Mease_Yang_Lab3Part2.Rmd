@@ -274,10 +274,13 @@ The log of density term was added to Model 2 to improve accuracy because the exp
 
 The log of the percent minority population was added to improve accuracy because, again, exploratory data analysis revealed that there is a positive correlation between and crime rate and this factor.
 
+
 ```{r}
 (Model2 = lm(log(crmrte) ~ prbarr + prbconv + log(polpc) +
                log(pctmin80) + log(density), data = crime))
+ 
 sprintf('R²: %.3f', summary(Model2)$r.squared)
+
 ```
 
 The `prbarr`, `prbconv`, and `polpc` variables retain their same direction of association as in Model 1, although the magnitude of the associations are reduced somewhat. In addition, we see that a 1% increase in the percent minority population is associated with a ~0.23% increase in the crime rate, and that a 1% increase in the population density is associated with a ~0.23% increase in crime rate.
@@ -301,26 +304,40 @@ sprintf('R²: %.3f', summary(Model3)$r.squared)
 By including all the remaining variables, the r-squared value of Model 3 improved by ~3% percentage points over Model 2. This compares with a ~24% percentage point improvement between Model 2 and Model 1. The analysts at Berkeley Analytica conclude that the improved fit of Model 3 is not justified by the additional data. In short, Model 2 is more valuable as Model 3 may be approaching over-fitting.
 
 ### Classical Linear Model Assumptions
-Before evaluating the statistical significance of...
+Before evaluating the statistical significance our models, it is essential to understand the validity of the Classical Linear Model Assumptions in this case.
 
-#### CLM 1 - Linear in parameters, CLM 2 - Random sampling, CLM 3 - No Multicollinearity
+#### CLM 1 - Linear in parameters
 
-We are now in a position to evaluate the first three classical linear model assumptions. First, the linearity observed above between the transformed key relationship variables and the transformed crime rate gives us reasonable confidence that the true relationship between these variables is approximately linear. Second, the sample under consideration is a cross section of counties in North Carolina and is assumed to be a true random sample of the population of North Carolina counties. xxxxxx
-Examine more on the source of the dataxxxxxxx  Third, our exploratory analysis found no perfect collinearity between the variables of key interest.
+The linearity observed above between the transformed key relationship variables and the transformed crime rate gives us reasonable confidence that the true relationship between these variables is approximately linear. The team at Berkeley Analytica was certain to transform any explanatory variable selected for a model such that the model would be linear in parameters. Therefore, we can conclude that this assumption is valid.
+
+#### CLM 2 - Random sampling
+
+The researchers and our instructors have provided a dataset for which we are not able to evaluate the assumption of random sampling fully. With what we know from the assignment, we can say that the data is from North Carolina and it includes data from 91 of 100 counties in the state. It is diffucult to assess the validity of the random sampling assumption without further information on why 9 of the counties were omitted.
+Further, some thought is required as to the validity of the timeframe over which the crime data was collected. It is our understanding that the crime data was selected from the 1980's, so to evaluate whether the conclusions drawn from this dataset are valid into the future one needs to know why that timeframe was selected. 
+Finally, in order to draw conclusions about the causes of crime and to inform policy decisions, the decision to sample only from the state of North Carolina should be highlighted. This data and the conclusions should be viewed through the context of the limited timeframe and the limited geographic scale inherent in the data.
+
+#### CLM 3 - No Multicollinearity
+
+Our exploratory analysis found no perfect collinearity between the variables of key interest.
 
 #### CLM 4 - Zero conditional mean
+Given the residuals vs. fitted plots showing there is no clear relationship between the fitted values and the residuals, we can conclude that the zero conditional mean assumption is valid. To the left-hand side of the residuals vs fitted plots graph, there is a deviation of the fit away from zero. However, this is driven by three data points that are all positive. 
+
 #### CLM 5 - Homoscedasticity
 
-The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values, except few values at the higher end.  The results show mixed evidence.
+The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values, except few values at the higher end.  Correlation analysis between residual and predictors are essentially 0, showing no evidence of endogeneity.
 
 #### CLM 6 - Normality of error terms
-Using histogram or Q-Q plots of the residuals to observe the normality.  This histogram of residuals shows that the residuals are distributed approximately normally with mean 0 (with the exception of a few outlying points with larger negative residuals). 
+Using histogram or Q-Q plots of the residuals to observe the normality.  The histogram of residuals show that the residuals are distributed approximately normal with mean 0 (with the exception of a few outlying points with larger residuals). 
  
 ```{r}
 plot(Model2)
 
-#spreadLevelPlot(Model1)
-#plot(Model1$fitted.values, Model1$residuals, main = 'Residuals and fitted values: Model 1')
+cor(crime$prbarr[-79],Model2$residuals)
+cor(crime$prbconv[-79],Model2$residuals)
+cor(log(crime$polpc[-79]),Model2$residuals)
+cor(log(crime$pctmin80[-79]),Model2$residuals)
+cor(log(crime$density[-79]),Model2$residuals)
 ```
 
 
@@ -344,10 +361,11 @@ qqline(stur, col="red", lwd=2)
 #t test of coefficients
 coeftest(Model2, vcov = vcovHC) 
 
-#vcovHC(Model1)
-
 (se.Model2 = sqrt(diag(vcovHC(Model2))))
-#summary(Model1)
+
+```
+```{r}
+coeftest(Model2, vcov = vcovHC)
 
 ```
 
@@ -370,17 +388,25 @@ stargazer(Model1, Model2, Model3, type = "text",
 ```
 
 ## Omitted Variables Discussion
-The results from the polpc (Police per capita) variable is counter-intuitive at first glance. However, on further 
-examination, it becomes clear that both crime rate and police per capita increase with increasing density, however,
-crime rate increases faster with density than police per capita. The net result is that there is a positive 
-correlation between police and crime. This does not, however, indicate that increasing police on the job will
-increase the crime rate. 
+In order for omitted variables to be causing an over-estimation of the coefficients in our model, two things must be true:
+1. The omitted variables must be correlated with the dependent variable
+2. The omitted variable must be correlated with one or more other independent variables.
+
+Possible candidates for omitted variables might include such varibles or concepts as:
+1. Education or literacy levels, which could be correlated with wages. Presumably, greater education gives individuals more access to the benefits of society and with that, more to lose from antisocial behavior. This can be measured through high school graduation and college graduation rates as well as years of education surveys. If education and literacy rates were included in the model, it is expected that they would be negatively correlated with crime rates, and that the coefficient for density would be pushed higher as a result.
+2. Cost of living, which may be correlated with population density and density. When the cost of living is high, some may feel pressured to undertake criminal endeavors to supplement their incomes. This could be measured using government data on cost of living. Cost of living would be expected to be positively correlated with crime rates, and if it were included in the model, it would be expected to push the density coefficient lower.
+3. Trust in law enforcement and the criminal justice system, which may be correlated with probability of arrest. When the public believes in law enforcement, they are more likely to provide information leading to arrests. This could be measured through surveys as well as the number of tips that are provided for each reported crime. If trust in law enforcement were included in the model, it would be expected to be negatively correlated with crime rates. It is expected that the coefficient for probabilty of arrest would become less negative and that the coefficient for probability conviction would less negative.
+4. Equality of economic opportunity, which may be correlated with wages, percent minority, and percent young male. It has been suggested that when people have access to economic opportunity through legal means, they do not feel the need to fall into criminal activities, and the more egalitarian that opportunity, the fewer people turn to crime. This could be measured by measuring the correlation between parent's income levels and children's income levels. It is believed that equality in economic opportunity would be negatively correlated with crime rates. If this variable were included in the model, it is expected that the percent minority coefficient would be less positive.
+5. Disparity of wealth and/or income, which may be correlated with percent minority, percent  young male, wages, and equality of economic opportunity above. Similar to access to economic opportunity, equality in wealth and/or income may lead to lower crime rates. This could be measured through income tax returns, home value assessments, and vehicle registrations, assuming those three data points provide a reasonable estimate of net worth and income. Disparity in wealth and or income would have a positive correlation with crime rates if it were measured and included in the model. Including this variable in the model would cause the percent minority coefficient to be less positive and the density coefficient to be less positive.
+6. Quality of management of police departments is another possible omitted variable that could correlate to both police per capita and crime rate. Police departments that are well managed would be more effective in reducing crime rates. Quality of management could be measured by identifying the policing tactics that are effective and determining which of these tactics are employed and the degree to which they are employed. Training and competency of the police force could also be measured. The effect of including quality of police management in the model would be to lower the police per capita coefficient as improving quality of management would be negatively correlated with the crime rate.
+
+The results from the polpc (Police per capita) variable is counter-intuitive at first glance. However, on further examination, it becomes clear that both crime rate and police per capita increase with increasing density, however, crime rate increases faster with density than police per capita. The net result is that there is a positive correlation between police and crime. This does not, however, indicate that increasing police on the job will increase the crime rate. 
 
 ## Conclusion
-Based on analysis of the data in this study, the political campaign could argue that to decrease crime rates, policing should be 
-geared towards more and faster arrests. Similarly, the criminal justice system should be geared towards more and faster convictions 
-with shorter prison sentences. Shortening prison sentences would allow for funds to be freed for use in other areas. The deterrent seems to 
-be in arrests and conviction, not as much in being sent to prison, or based on how long a prison sentence is.
+
+The data provided for this study can not be confirmed to meet the random sampling assumptions, and therefore policy analysts should be careful in the application of the conclusions of this study. In particular, policies under consideration thirty years after the data was collected should be checked for validity today. Similarly, when developing policies from this data for  geographies other than North Carolina, the information should be supplemented with local knowledge to correct for the fact that the data was limited to North Carolina.
+
+Based on analysis of the data in this study, the political campaign could argue that to decrease crime rates, policing should be geared towards more and faster arrests. Similarly, the criminal justice system should be geared towards more and faster convictions with shorter prison sentences. Shortening prison sentences would allow for funds to be freed for use in other areas. The deterrent seems to be in arrests and conviction, not as much in being sent to prison, or based on how long a prison sentence is.
 
 Similarly, the political campaign could push for funding programs that keep young males busy and away from criminal elements.
 
@@ -388,3 +414,5 @@ Further studies are needed to understand if value is created for society by havi
 realized by improving transportation options to allow for more suburban developments in favor of urban developments.
 
 Finally, further studies could be performed to see if improving the mix of minorities in neighborhoods helps to reduce crime rates.
+
+Berkeley Analytica believes that a more comprehensive model of the causes of crime could be collected by obtaining and evaluating data on education, cost of living, trust in law enforcement, economic opportunity, economic disparity, and quality of policing. With these variables included in the crime model, Berkeley Analytica believes that further policy recommendations can be developed to help the political operatives win their next election and to govern for the betterment of society.
