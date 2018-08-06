@@ -377,8 +377,7 @@ se.Model1 = sqrt(diag(vcovHC(Model1)))
 se.Model2 = sqrt(diag(vcovHC(Model2)))
 se.Model3 = sqrt(diag(vcovHC(Model3)))
 
-stargazer(Model1, Model2, Model3, type = "text", 
-          #report = "vc", # Don't report errors, since we haven't covered them
+stargazer(Model1, Model2, Model3, type = "latex", 
           title = "Linear Models Predicting Crime Rate",
           omit.stat=c('f', 'adj.rsq'),
           star.cutoffs = c(0.05, 0.01, 0.001),
