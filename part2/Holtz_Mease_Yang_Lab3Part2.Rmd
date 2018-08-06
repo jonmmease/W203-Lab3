@@ -323,50 +323,30 @@ Our exploratory analysis found no perfect collinearity between the variables of 
 #### CLM 4 - Zero conditional mean
 Given the residuals vs. fitted plots showing there is no clear relationship between the fitted values and the residuals, we can conclude that the zero conditional mean assumption is valid. To the left-hand side of the residuals vs fitted plots graph, there is a deviation of the fit away from zero. However, this is driven by three data points that are all positive. 
 
+```{r}
+plot(Model2, which=1)
+```
+
 #### CLM 5 - Homoscedasticity
 
-The residual vs. fitted value plot shows the residuals are centered on 0 (exogeneity) with relatively constant variance (homoskedasticity) across the range of fitted values, except few values at the higher end.  Correlation analysis between residual and predictors are essentially 0, showing no evidence of endogeneity.
+The residual vs. fitted value plot shows the residuals are centered on 0 with relatively constant variance (homoskedasticity) across the range of fitted values, except few values at the higher end.  The Scale-Location plot shows that the average of the square root of the standardized residuals remains nearly constant across the range of fitted values. The only exception is at the far left of the plot, where there are only two observations. Even though this provides strong evidence for homoscedasticity, we will apply the more conservative homoscedasticity robust standard error calculations in our assessment of statistical significence of the model coefficients.
+
+```{r}
+plot(Model2, which=3)
+```
 
 #### CLM 6 - Normality of error terms
 Using histogram or Q-Q plots of the residuals to observe the normality.  The histogram of residuals show that the residuals are distributed approximately normal with mean 0 (with the exception of a few outlying points with larger residuals). 
- 
+
 ```{r}
-plot(Model2)
-
-cor(crime$prbarr[-79],Model2$residuals)
-cor(crime$prbconv[-79],Model2$residuals)
-cor(log(crime$polpc[-79]),Model2$residuals)
-cor(log(crime$pctmin80[-79]),Model2$residuals)
-cor(log(crime$density[-79]),Model2$residuals)
+plot(Model2, which=2)
 ```
-
 
 ```{r}
 # normality of standard residuals
 stdr = rstandard(Model2)
-hist(stdr, main="Standard residuals", breaks = 100, freq=FALSE) 
+hist(stdr, main="Standard residuals", breaks = seq(-3.75, 3.75, 0.5), freq=FALSE) 
 curve(dnorm(x, mean=0, sd=sd(stdr)), col="red", lwd=2, add=TRUE) 
-
-# normality of studentized residuals
-stur = rstudent(Model2)
-hist(stur, main="Studentized residuals", breaks = 100, freq=FALSE) 
-curve(dnorm(x, mean=0, sd=sd(stdr)), col="red", lwd=2, add=TRUE) 
-
-qqPlot(stdr, distribution="norm", pch=20, main="QQ-Plot standard residuals") 
-qqline(stdr, col="red", lwd=2)
-
-qqPlot(stur, distribution="norm", pch=20, main="QQ-Plot studentized residuals") 
-qqline(stur, col="red", lwd=2)
-
-#t test of coefficients
-coeftest(Model2, vcov = vcovHC) 
-
-(se.Model2 = sqrt(diag(vcovHC(Model2))))
-
-```
-```{r}
-coeftest(Model2, vcov = vcovHC)
-
 ```
 
 ### Models Table
